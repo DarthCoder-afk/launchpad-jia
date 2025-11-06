@@ -10,6 +10,7 @@ import { useAppContext } from "@/lib/context/AppContext";
 import axios from "axios";
 import CareerActionModal from "./CareerActionModal";
 import FullScreenLoadingAnimation from "./FullScreenLoadingAnimation";
+import ProgressHeader from "./ProgressHeader";
   // Setting List icons
   const screeningSettingList = [
     {
@@ -98,6 +99,12 @@ export default function CareerForm({ career, formType, setShowEditModal }: { car
     const [showSaveModal, setShowSaveModal] = useState("");
     const [isSavingCareer, setIsSavingCareer] = useState(false);
     const savingCareerRef = useRef(false);
+    const [step, setStep] = useState(1);
+    const totalSteps = 5;
+
+    const handleNext = () => setStep(prev => Math.min(prev + 1, totalSteps));
+    const handlePrev = () => setStep(prev => Math.max(prev - 1, 1));
+
 
     const isFormValid = () => {
         return jobTitle?.trim().length > 0 && description?.trim().length > 0 && questions.some((q) => q.questions.length > 0) && workSetup?.trim().length > 0;
@@ -243,6 +250,8 @@ export default function CareerForm({ career, formType, setShowEditModal }: { car
 
     return (
         <div className="col">
+       
+          
         {formType === "add" ? (<div style={{ marginBottom: "35px", display: "flex", flexDirection: "row", justifyContent: "space-between", alignItems: "center", width: "100%" }}>
               <h1 style={{ fontSize: "24px", fontWeight: 550, color: "#111827" }}>Add new career</h1>
               <div style={{ display: "flex", flexDirection: "row", alignItems: "center", gap: "10px" }}>
@@ -290,6 +299,13 @@ export default function CareerForm({ career, formType, setShowEditModal }: { car
               </div>
        </div>
         )}
+
+         <ProgressHeader step={step} totalSteps={totalSteps} />
+
+       
+
+       
+
         <div style={{ display: "flex", flexDirection: "row", justifyContent: "space-between", width: "100%", gap: 16, alignItems: "flex-start", marginTop: 16 }}>
         <div style={{ width: "60%", display: "flex", flexDirection: "column", gap: 8 }}>
           <div className="layered-card-outer">
