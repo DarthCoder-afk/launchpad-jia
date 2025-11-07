@@ -1031,14 +1031,14 @@ export default function CareerForm({ career, formType, setShowEditModal }: { car
 
               {/* Right Section — Tips */}
               <div style={{ width: "40%", display: "flex", flexDirection: "column", gap: 16 }}>
-                <div className="layered-card-outer bg-[#F9FAFB] rounded-2xl border border-[#E9EAEB] p-2">
+                <div className="layered-card-outer bg-[#F9FAFB] rounded-2xl border border-[#E9EAEB] p-2" style={{ width: "fit-content", maxWidth: 340, alignSelf: "flex-start" }}>
                   <h3 className="text-lg font-semibold text-[#181D27] m-3">💡 Tips</h3>
                   <div className="layered-card-middle bg-white p-4 mb-2">
                    
-                    <ul style={{ paddingLeft: 16, marginTop: 8, color: "#414651", fontSize: 14 }}>
-                      <li>Use clear, standard job titles for better searchability.</li>
-                      <li>Avoid abbreviations or internal role codes that applicants may not understand.</li>
-                      <li>Keep it concise — job titles should be short and clear.</li>
+                    <ul style={{ paddingLeft: 0, marginTop: 8, color: "#414651", fontSize: 14, listStyle: 'none' }}>
+                      <li><span style={{ fontWeight: 600 }}>Use clear, standard job titles</span> for better searchability (e.g., “Software Engineer” instead of “Code Ninja” or “Tech Rockstar”).</li>
+                      <li style={{ marginTop: 8 }}><span style={{ fontWeight: 600 }}>Avoid abbreviations</span> or internal role codes that applicants may not understand (e.g., use “QA Engineer” instead of “QE II” or “QA-TL”).</li>
+                      <li style={{ marginTop: 8 }}><span style={{ fontWeight: 600 }}>Keep it concise</span> — job titles should be no more than a few words (2–4 max), avoiding fluff or marketing terms.</li>
                     </ul>
                   </div>
                 </div>
