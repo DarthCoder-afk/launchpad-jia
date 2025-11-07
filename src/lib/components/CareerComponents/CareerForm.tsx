@@ -54,7 +54,7 @@ export default function CareerForm({ career, formType, setShowEditModal }: { car
     const [workSetup, setWorkSetup] = useState(career?.workSetup || "");
     const [workSetupRemarks, setWorkSetupRemarks] = useState(career?.workSetupRemarks || "");
     const [screeningSetting, setScreeningSetting] = useState(career?.screeningSetting || "Good Fit and above");
-    const [employmentType, setEmploymentType] = useState(career?.employmentType || "Full-Time");
+    const [employmentType, setEmploymentType] = useState(career?.employmentType || "");
     const [requireVideo, setRequireVideo] = useState(career?.requireVideo || true);
     const [salaryNegotiable, setSalaryNegotiable] = useState(career?.salaryNegotiable || true);
     const [minimumSalary, setMinimumSalary] = useState(career?.minimumSalary || "");
@@ -92,7 +92,7 @@ export default function CareerForm({ career, formType, setShowEditModal }: { car
       },
     ]);
     const [country, setCountry] = useState(career?.country || "Philippines");
-    const [province, setProvince] = useState(career?.province ||"");
+    const [province, setProvince] = useState(career?.province ||"Choose Province");
     const [city, setCity] = useState(career?.location || "");
     const [provinceList, setProvinceList] = useState([]);
     const [cityList, setCityList] = useState([]);
@@ -258,14 +258,13 @@ export default function CareerForm({ career, formType, setShowEditModal }: { car
     useEffect(() => {
         const parseProvinces = () => {
           setProvinceList(philippineCitiesAndProvinces.provinces);
-          const defaultProvince = philippineCitiesAndProvinces.provinces[0];
-          if (!career?.province) {
-            setProvince(defaultProvince.name);
-          }
-          const cities = philippineCitiesAndProvinces.cities.filter((city) => city.province === defaultProvince.key);
-          setCityList(cities);
-          if (!career?.location) {
-            setCity(cities[0].name);
+          // Only set default values if career data exists
+          if (career?.province) {
+            const provinceObj = philippineCitiesAndProvinces.provinces.find((p) => p.name === career.province);
+            if (provinceObj) {
+              const cities = philippineCitiesAndProvinces.cities.filter((city) => city.province === provinceObj.key);
+              setCityList(cities);
+            }
           }
         }
         parseProvinces();
