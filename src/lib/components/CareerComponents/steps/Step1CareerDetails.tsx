@@ -60,7 +60,7 @@ export default function Step1CareerDetails({
       {/* === LEFT COLUMN === */}
         <div style={{ width: "100%", display: "flex", flexDirection: "column", gap: 24 }}>
             {/* Career Information */}
-            <div className="layered-card-outer bg-[#F9FAFB] rounded-2xl border border-[#E9EAEB] p-2">
+            <div className="layered-card-outer--solid rounded-2xl border border-[#E9EAEB] p-2">
                 <h2 className="text-lg font-semibold text-[#181D27] m-3">1. Career Information</h2>
                 <div className="layered-card-middle bg-white p-4 mb-2">
                     {/* Basic Info */}
@@ -276,7 +276,7 @@ export default function Step1CareerDetails({
             </div>
 
             {/* Job Description */}
-            <div className="layered-card-outer bg-[#F9FAFB] rounded-2xl border border-[#E9EAEB] p-2">
+            <div className="layered-card-outer--solid rounded-2xl border border-[#E9EAEB] p-2">
                 <h2 className="text-lg font-semibold text-[#181D27] m-3">2. Job Description</h2>
                 <div className="layered-card-middle bg-white p-4 mb-2">
                     <RichTextEditor setText={setDescription} text={description} />
@@ -289,7 +289,7 @@ export default function Step1CareerDetails({
             </div>
 
             {/* Team Access */}
-            <div className="layered-card-outer bg-[#F9FAFB] rounded-2xl border border-[#E9EAEB] p-2 mb-5">
+            <div className="layered-card-outer--solid rounded-2xl border border-[#E9EAEB] p-2 mb-5">
                 <h2 className="text-lg font-semibold text-[#181D27] m-3">3. Team Access</h2>
                     <div className="layered-card-middle bg-white p-4 mb-2">
                         {/* Add more members section */}
@@ -485,7 +485,7 @@ export default function Step1CareerDetails({
 
         {/* === RIGHT COLUMN (Tips) === */}
         <div style={{ width: "40%", display: "flex", flexDirection: "column", gap: 16 }}>
-            <div className="layered-card-outer bg-[#F9FAFB] rounded-2xl border border-[#E9EAEB] p-2" style={{ maxWidth: 340 }}>
+            <div className="layered-card-outer--solid rounded-2xl border border-[#E9EAEB] p-2" style={{ maxWidth: 340 }}>
                 <h3 className="text-lg font-semibold text-[#181D27] m-3">💡 Tips</h3>
                 <div className="layered-card-middle bg-white p-4 mb-2">
                     <ul style={{ paddingLeft: 0, marginTop: 8, color: "#414651", fontSize: 14, listStyle: "none" }}>
