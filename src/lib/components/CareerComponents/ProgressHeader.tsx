@@ -16,11 +16,9 @@ export default function ProgressHeader({ step, totalSteps }: ProgressHeaderProps
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: "16px", marginBottom: "32px" }}>
-
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", position: "relative" }}>
         {steps.map((label, index) => {
           const isActive = step === index + 1;
-          const isCompleted = step > index + 1;
 
           return (
             <div
@@ -31,24 +29,33 @@ export default function ProgressHeader({ step, totalSteps }: ProgressHeaderProps
                 alignItems: "center",
                 flex: 1,
                 position: "relative",
+                zIndex: 1,
               }}
             >
-              {/* Circle */}
+              {/* Outer Circle with Inner Solid Circle */}
               <div
                 style={{
                   width: 24,
                   height: 24,
                   borderRadius: "50%",
-                  backgroundColor: isActive || isCompleted ? "#000" : "#E5E7EB",
-                  color: "#fff",
+                  backgroundColor: isActive ? "#FFFFFF" : "#E5E7EB",
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
-                  fontSize: 12,
-                  zIndex: 1,
+                  position: "relative",
+                  border: isActive ? "2px solid #000000" : "2px solid #E5E7EB",
+                  zIndex: 2,
                 }}
               >
-                {index + 1}
+                {/* Inner Solid Circle */}
+                <div
+                  style={{
+                    width: 8,
+                    height: 8,
+                    borderRadius: "50%",
+                    backgroundColor: isActive ? "#181D27" : "#E5E7EB",
+                  }}
+                />
               </div>
 
               {/* Connector Line */}
@@ -59,8 +66,8 @@ export default function ProgressHeader({ step, totalSteps }: ProgressHeaderProps
                     top: 12,
                     left: "50%",
                     width: "100%",
-                    height: 2,
-                    backgroundColor: isCompleted ? "#000" : "#E5E7EB",
+                    height: 4,
+                    backgroundColor: "#E5E7EB",
                     zIndex: 0,
                   }}
                 />
@@ -70,7 +77,8 @@ export default function ProgressHeader({ step, totalSteps }: ProgressHeaderProps
               <span
                 style={{
                   fontSize: "12px",
-                  color: isActive ? "#000" : "#6B7280",
+                  color: isActive ? "#181D27" : "#6B7280",
+                  fontWeight: isActive ? 600 : 400,
                   marginTop: 8,
                   textAlign: "center",
                   whiteSpace: "nowrap",
