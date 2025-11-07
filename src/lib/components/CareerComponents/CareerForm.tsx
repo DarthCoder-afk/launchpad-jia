@@ -112,9 +112,26 @@ export default function CareerForm({ career, formType, setShowEditModal }: { car
     const addMemberDropdownRef = useRef<HTMLDivElement>(null);
 
 
-    const isFormValid = () => {
-        return jobTitle?.trim().length > 0 && description?.trim().length > 0 && questions.some((q) => q.questions.length > 0) && workSetup?.trim().length > 0;
+  const isFormValid = () => {
+    // Step-aware validation: Team Access and Questions are NOT required on Step 1
+    if (step === 1) {
+      const hasJobTitle = jobTitle?.trim().length > 0;
+      const hasDescription = description?.trim().length > 0;
+      const hasEmploymentType = employmentType?.trim().length > 0;
+      const hasWorkSetup = workSetup?.trim().length > 0;
+      const hasProvince = province && province !== "Choose Province";
+      const hasCity = city?.trim().length > 0;
+      return hasJobTitle && hasDescription && hasEmploymentType && hasWorkSetup && hasProvince && hasCity;
     }
+
+    // For later steps, fall back to original strict validation (including questions)
+    return (
+      jobTitle?.trim().length > 0 &&
+      description?.trim().length > 0 &&
+      questions.some((q) => q.questions.length > 0) &&
+      workSetup?.trim().length > 0
+    );
+  }
 
     const updateCareer = async (status: string) => {
         if (Number(minimumSalary) && Number(maximumSalary) && Number(minimumSalary) > Number(maximumSalary)) {
@@ -243,15 +260,26 @@ export default function CareerForm({ career, formType, setShowEditModal }: { car
     }
 
     const handleSaveAndContinue = async () => {
-        if (!isFormValid()) {
-          setShowValidation(true); // trigger red borders + validation messages
-          return;
+    if (!isFormValid()) {
+      setShowValidation(true); // trigger red borders + validation messages
+      const invalidFields = document.querySelectorAll('.form-control');
+      invalidFields.forEach((field) => {
+        const inputField = field as HTMLInputElement;
+        // Mark empty or whitespace-only inputs as invalid
+        if (!inputField.value || !inputField.value.trim()) {
+          inputField.style.border = '1px solid #EF4444';
+        } else {
+          // Reset border for now-valid inputs
+          inputField.style.border = '';
         }
+      });
+      return;
+    }
 
-        // 2️⃣ Save data temporarily as "draft" or "inactive"
+        // Save data temporarily as "draft" or "inactive"
         await saveCareer("draft");
 
-        // 3️⃣ Move to next step in the progress header
+        // Move to next step in the progress header
         handleNext();
       };
 
@@ -486,16 +514,17 @@ export default function CareerForm({ career, formType, setShowEditModal }: { car
                       onClick={handleSaveAndContinue}
                       style={{
                         width: "fit-content",
-                        background: !isFormValid() || isSavingCareer ? "#D5D7DA" : "black",
+                        background: isSavingCareer ? "#D5D7DA" : "black",
                         color: "#fff",
                         border: "1px solid #E9EAEB",
                         padding: "8px 16px",
                         borderRadius: "60px",
-                        cursor: !isFormValid() || isSavingCareer ? "not-allowed" : "pointer",
+                        cursor: isSavingCareer ? "not-allowed" : "pointer",
                         whiteSpace: "nowrap",
                         display: "flex",
                         alignItems: "center",
                         gap: 8,
+                        transition: "background 0.2s ease"
                       }}
                     >
                       Save and Continue <i className="la la-arrow-right"></i>
@@ -522,21 +551,36 @@ export default function CareerForm({ career, formType, setShowEditModal }: { car
                   </button>
 
                   <button
-                    disabled={!isFormValid() || isSavingCareer}
+                    disabled={isSavingCareer} // keep interactive even if invalid; validation handled on click
                     style={{
                       width: "fit-content",
-                      background: !isFormValid() || isSavingCareer ? "#D5D7DA" : "black",
+                      background: isSavingCareer ? "#D5D7DA" : "black",
                       color: "#fff",
                       border: "1px solid #E9EAEB",
                       padding: "8px 16px",
                       borderRadius: "60px",
-                      cursor: !isFormValid() || isSavingCareer ? "not-allowed" : "pointer",
+                      cursor: isSavingCareer ? "not-allowed" : "pointer",
                       whiteSpace: "nowrap",
                       display: "flex",
                       alignItems: "center",
                       gap: 8,
+                      transition: "background 0.2s ease"
                     }}
                     onClick={async () => {
+                      // For edit flow, still enforce required fields before proceeding
+                      if (!isFormValid()) {
+                        setShowValidation(true);
+                        const invalidFields = document.querySelectorAll('.form-control');
+                        invalidFields.forEach((field) => {
+                          const inputField = field as HTMLInputElement;
+                          if (!inputField.value || !inputField.value.trim()) {
+                            inputField.style.border = '1px solid #EF4444';
+                          } else {
+                            inputField.style.border = '';
+                          }
+                        });
+                        return; // block save until valid
+                      }
                       await updateCareer("draft");
                       handleNext();
                     }}
