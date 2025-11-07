@@ -591,7 +591,26 @@ export default function CareerForm({ career, formType, setShowEditModal }: { car
        </div>
         )}
 
-         <ProgressHeader step={step} totalSteps={totalSteps} />
+         {/* Progress header now supports a half-progress (50%) state before advancing */}
+         <ProgressHeader
+           step={step}
+           totalSteps={totalSteps}
+           currentStepPartial={(() => {
+             // Show half progress only while on a step AND required fields for that step are satisfied
+             // but user hasn't moved forward yet. For now we implement for Step 1 (can be extended later).
+             if (step === 1) {
+               const hasJobTitle = jobTitle?.trim().length > 0;
+               const hasDescription = description?.trim().length > 0;
+               const hasEmploymentType = employmentType?.trim().length > 0;
+               const hasWorkSetup = workSetup?.trim().length > 0;
+               const hasProvince = province && province !== "Choose Province";
+               const hasCity = city?.trim().length > 0;
+               return hasJobTitle && hasDescription && hasEmploymentType && hasWorkSetup && hasProvince && hasCity;
+             }
+             // Placeholder for future steps if partial states are needed.
+             return false;
+           })()}
+         />
           {step === 1 && (
 
             <div style={{
