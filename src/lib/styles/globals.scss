@@ -2087,6 +2087,15 @@ $gifURL: "/gr-1.gif";
   );
   border-radius: 20px;
   padding-top: 10px;
+} 
+
+// Solid variant for cases where a neutral background is desired.
+.layered-card-outer--solid {
+  margin-top: 16px;
+  width: 100%;
+  background-color: #F8F9FC; // matches Tailwind arbitrary color bg-[#F8F9FC]
+  border-radius: 20px;
+  padding-top: 10px;
 }
 
 .layered-card-content {
@@ -2380,6 +2389,7 @@ input:checked + .slider:before {
     #fccec0 100%
   );
   -webkit-background-clip: text;
+  background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 
