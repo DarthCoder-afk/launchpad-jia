@@ -592,10 +592,22 @@ export default function CareerForm({ career, formType, setShowEditModal }: { car
         )}
 
          <ProgressHeader step={step} totalSteps={totalSteps} />
-         {step === 1 && (
-            <div style={{ display: "flex", justifyContent: "space-between", width: "100%", gap: 16, alignItems: "flex-start", marginTop: 16 }}>
+          {step === 1 && (
+
+            <div style={{
+              // Made the two columns in the center on larger screens
+              display: "flex",  
+              justifyContent: "center",
+              width: "100%",
+              gap: 20,
+              alignItems: "flex-start",
+              marginTop: 16,
+              maxWidth: 1500,
+              marginLeft: "auto",
+              marginRight: "auto"
+            }}>
               {/* Left Section */}
-              <div style={{ width: "60%", display: "flex", flexDirection: "column", gap: 24 }}>
+              <div style={{ width: "100%", display: "flex", flexDirection: "column", gap: 24 }}>
 
                 {/* 1️⃣ Career Information */}
                 <div className="layered-card-outer bg-[#F9FAFB] rounded-2xl border border-[#E9EAEB] p-2">
