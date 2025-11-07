@@ -495,15 +495,18 @@ export default function Step1CareerDetails({
                     </svg> 
                 Tips</h3>
                 <div className="layered-card-middle bg-white p-4 mb-2">
-                    <ul style={{ paddingLeft: 0, marginTop: 8, color: "#414651", fontSize: 14, listStyle: "none" }}>
+                    <ul className="text-justify" style={{ paddingLeft: 0, marginTop: 8, color: "#414651", fontSize: 14, listStyle: "none" }}>
                         <li>
-                            <strong>Use clear, standard job titles</strong> for better searchability.
+                            <strong>Use clear, standard job titles</strong> for better searchability 
+                            (e.g., “Software Engineer” instead of “Code Ninja” or “Tech Rockstar”).
                         </li>
                         <li style={{ marginTop: 8 }}>
-                            <strong>Avoid abbreviations</strong> that applicants may not understand.
+                            <strong>Avoid abbreviations</strong>  or internal role codes that applicants may not understand (
+                                e.g., use “QA Engineer” instead of “QE II” or “QA-TL”).
                         </li>
                         <li style={{ marginTop: 8 }}>
-                            <strong>Keep it concise</strong> — job titles should be 2–4 words max.
+                            <strong>Keep it concise</strong> — job titles should be no more than a few words (2–4 max),
+                             avoiding fluff or marketing terms.
                         </li>
                     </ul>
                 </div>
