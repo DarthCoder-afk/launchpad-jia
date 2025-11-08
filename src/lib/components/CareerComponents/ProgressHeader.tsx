@@ -54,7 +54,7 @@ export default function ProgressHeader({ step, totalSteps, currentStepPartial }:
                   width: 20,
                   height: 20,
                   borderRadius: "50%",
-                  backgroundColor: isActive ? "#FFFFFF" : isCompleted ? "#FFFFFF" : "#E5E7EB",
+                  backgroundColor: isActive ? "#FFFFFF" : isCompleted ? "#000000" : "#E5E7EB",
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
@@ -65,7 +65,12 @@ export default function ProgressHeader({ step, totalSteps, currentStepPartial }:
                   transition: "border-color 0.25s ease, background-color 0.25s ease",
                 }}
                 className="md:w-6 md:h-6"
-              >
+                >
+                  {isCompleted ? (
+                    <img src="/icons/checkV3.svg" alt="checkmark"
+                    width={20}
+                    height={20} />
+                  ) : null}
                 <div
                   style={{
                     width: 6,
@@ -86,7 +91,7 @@ export default function ProgressHeader({ step, totalSteps, currentStepPartial }:
                     top: 10,
                     left: "50%",
                     width: "100%",
-                    height: 4,
+                    height: 5,
                     backgroundColor: "#E5E7EB",
                     zIndex: 0,
                     overflow: "hidden",
