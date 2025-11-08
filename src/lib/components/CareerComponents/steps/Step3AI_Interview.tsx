@@ -1,15 +1,28 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useImperativeHandle, useMemo, useState, forwardRef } from "react";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 // Functional UI for Step 3: AI Interview Setup – adds generation and editing controls.
 
+export type Step3InterviewRef = {
+  validateQuestions: () => boolean;
+};
+
+const MIN_TOTAL_QUESTIONS = 5;
+
+type Question = {
+	text: string;
+	source: "ai" | "manual";
+	editing: boolean; // true when input is editable
+};
+
 type Category = {
 	label: string;
-	questions: string[];
+	questions: Question[];
 	askCount: number;
+	showAskCount?: boolean;
 };
 
 type GeneratePayload = {
@@ -20,28 +33,38 @@ type GeneratePayload = {
 	existingQuestions?: string[];
 };
 
-export default function Step3AI_Interview({
-	jobDescription,
-	secretPrompt,
-}: {
-	jobDescription?: string;
-	secretPrompt?: string;
-}) {
+const Step3AI_Interview = forwardRef<Step3InterviewRef, { jobDescription?: string; secretPrompt?: string }>(
+({ jobDescription, secretPrompt }, ref) => {
 	const [loadingAll, setLoadingAll] = useState(false);
 	const [loadingIdx, setLoadingIdx] = useState<number | null>(null);
+	const [showMinError, setShowMinError] = useState(false);
 		// Start with empty questions; user will generate them (no static seed)
 		const [categories, setCategories] = useState<Category[]>([
-			{ label: "CV Validation / Experience", questions: [], askCount: 2 },
-			{ label: "Technical", questions: [], askCount: 2 },
-			{ label: "Behavioral", questions: [], askCount: 2 },
-			{ label: "Analytical", questions: [], askCount: 2 },
-			{ label: "Others", questions: [], askCount: 2 },
+			{ label: "CV Validation / Experience", questions: [], askCount: 2, showAskCount: false },
+			{ label: "Technical", questions: [], askCount: 2, showAskCount: false },
+			{ label: "Behavioral", questions: [], askCount: 2, showAskCount: false },
+			{ label: "Analytical", questions: [], askCount: 2, showAskCount: false },
+			{ label: "Others", questions: [], askCount: 2, showAskCount: false },
 		]);
 
 	const totalQuestions = useMemo(
 		() => categories.reduce((sum, c) => sum + c.questions.length, 0),
 		[categories]
 	);
+
+	useImperativeHandle(ref, () => ({
+		validateQuestions: () => {
+			const ok = totalQuestions >= MIN_TOTAL_QUESTIONS;
+			setShowMinError(!ok);
+			return ok;
+		},
+	}));
+
+	useEffect(() => {
+		if (showMinError && totalQuestions >= MIN_TOTAL_QUESTIONS) {
+			setShowMinError(false);
+		}
+	}, [totalQuestions, showMinError]);
 
 	async function generateForIndex(index: number) {
 		const cat = categories[index];
@@ -53,7 +76,7 @@ export default function Step3AI_Interview({
 				askCount: Math.max(1, Math.min(20, cat.askCount || 1)),
 				jobDescription,
 				secretPrompt,
-				existingQuestions: cat.questions,
+				existingQuestions: cat.questions.map((q) => q.text),
 			};
 			const res = await fetch("/api/generate-interview-question", {
 				method: "POST",
@@ -67,7 +90,8 @@ export default function Step3AI_Interview({
 			const data: { label: string; questions: string[] } = await res.json();
 			setCategories((prev) => {
 				const copy = [...prev];
-				copy[index] = { ...copy[index], questions: data.questions };
+				const aiQs: Question[] = data.questions.map((q) => ({ text: q, source: "ai" as const, editing: false }));
+				copy[index] = { ...copy[index], questions: aiQs };
 				return copy;
 			});
 		} catch (e) {
@@ -90,6 +114,18 @@ export default function Step3AI_Interview({
 		}
 	}
 
+	function revealAskCount(index: number) {
+		setCategories((prev) => {
+			const copy = [...prev];
+			copy[index] = { ...copy[index], showAskCount: true };
+			return copy;
+		});
+	}
+
+	function revealAllAskCount() {
+		setCategories((prev) => prev.map((c) => ({ ...c, showAskCount: true })));
+	}
+
 	function updateAskCount(index: number, value: number) {
 		const v = Math.max(0, Math.min(20, Number.isFinite(value) ? value : 0));
 		setCategories((prev) => {
@@ -109,14 +145,43 @@ export default function Step3AI_Interview({
 		});
 	}
 
-	function editQuestion(index: number, qIndex: number, value: string) {
+	function updateQuestionText(index: number, qIndex: number, value: string) {
 		setCategories((prev) => {
 			const copy = [...prev];
 			const qs = [...copy[index].questions];
-			qs[qIndex] = value;
+			qs[qIndex] = { ...qs[qIndex], text: value };
 			copy[index] = { ...copy[index], questions: qs };
 			return copy;
 		});
+	}
+
+	function setEditing(index: number, qIndex: number, editing: boolean) {
+		setCategories((prev) => {
+			const copy = [...prev];
+			const qs = [...copy[index].questions];
+			qs[qIndex] = { ...qs[qIndex], editing };
+			copy[index] = { ...copy[index], questions: qs };
+			return copy;
+		});
+	}
+
+	function addManualQuestion(index: number) {
+		setCategories((prev) => {
+			const copy = [...prev];
+			const qs = [...copy[index].questions, { text: "", source: "manual" as const, editing: true }];
+			// Hide askCount UI and revert button state when user opts to manually add
+			copy[index] = { ...copy[index], questions: qs, showAskCount: false };
+			return copy;
+		});
+	}
+
+	function saveQuestion(index: number, qIndex: number) {
+		const q = categories[index].questions[qIndex];
+		if (!q.text.trim()) {
+			toast.error("Question cannot be empty");
+			return;
+		}
+		setEditing(index, qIndex, false);
 	}
 
 	return (
@@ -300,7 +365,15 @@ export default function Step3AI_Interview({
 								lineHeight: 1.1,
 							}}
 							aria-label="Generate all questions"
-							onClick={() => (!loadingAll && loadingIdx === null ? generateAll() : undefined)}
+							onClick={() => {
+								if (loadingAll || loadingIdx !== null) return;
+								const anyHidden = categories.some((c) => !c.showAskCount);
+								if (anyHidden) {
+									revealAllAskCount();
+									return;
+								}
+								generateAll();
+							}}
 						>
 							<img
                                 className="m-1 invert"
@@ -310,9 +383,15 @@ export default function Step3AI_Interview({
                                 alt="light bulb icon"
                                 aria-hidden="true"
                             />
-							{loadingAll ? "Generating..." : "Generate all questions"}
+							{loadingAll ? "Generating..." : categories.every((c) => c.showAskCount) ? "Generate now" : "Generate all questions"}
 						</button>
 					</div>
+					{showMinError && (
+						<div style={{ display: 'flex', alignItems: 'center', gap: 8, margin: '0 16px 8px 16px', color: '#B42318', fontSize: 13 }}>
+							<i className="la la-exclamation-triangle" aria-hidden="true" style={{ fontSize: 16 }}></i>
+							<span>Please add at least {MIN_TOTAL_QUESTIONS} interview questions.</span>
+						</div>
+					)}
 					<div className="layered-card-middle bg-white p-4 mb-2" style={{ gap: 12 }}>
 						{categories.map((cat, idx) => (
 							<div key={cat.label}>
@@ -325,7 +404,7 @@ export default function Step3AI_Interview({
 										padding: "10px 12px",
 										borderRadius: 5,
 									}}
-								>
+								    >
 									<p style={{ margin: 0, fontSize: 14, fontWeight: 600, color: "#181D27" }}>{cat.label}</p>
 									{cat.questions.length > 0 && (
 										<div style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: 10 }}>
@@ -337,16 +416,24 @@ export default function Step3AI_Interview({
 														</div>
 														<input
 															type="text"
-															value={q}
-															onChange={(e) => editQuestion(idx, qIdx, e.target.value)}
-															style={{ flex: 1, border: 'none', outline: 'none', color: '#181D27', fontSize: 14 }}
+															value={q.text}
+															readOnly={!q.editing}
+															onChange={(e) => updateQuestionText(idx, qIdx, e.target.value)}
+															style={{ flex: 1, border: 'none', outline: 'none', color: '#181D27', fontSize: 14, background: 'transparent' }}
 														/>
 													</div>
 													<div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-														<button type="button" style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '6px 10px', borderRadius: 999, border: '1px solid #E9EAEB', background: '#FFFFFF', color: '#181D27', fontSize: 13, cursor: 'default' }}>
-															<i className="la la-pencil" aria-hidden="true"></i>
-															Edit
-														</button>
+														{q.editing ? (
+															<button type="button" onClick={() => saveQuestion(idx, qIdx)} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '6px 10px', borderRadius: 999, border: '1px solid #181D27', background: '#181D27', color: '#FFFFFF', fontSize: 13 }}>
+																<i className="la la-save" aria-hidden="true"></i>
+																Save
+															</button>
+														) : (
+															<button type="button" onClick={() => setEditing(idx, qIdx, true)} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '6px 10px', borderRadius: 999, border: '1px solid #E9EAEB', background: '#FFFFFF', color: '#181D27', fontSize: 13 }}>
+																<i className="la la-pencil" aria-hidden="true"></i>
+																Edit
+															</button>
+														)}
 														<button type="button" title="Delete" onClick={() => deleteQuestion(idx, qIdx)} style={{ width: 32, height: 32, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', borderRadius: 999, border: '1px solid #FEE4E2', background: '#FFF7F7', color: '#EF4444' }}>
 															<i className="la la-trash" aria-hidden="true"></i>
 														</button>
@@ -355,9 +442,9 @@ export default function Step3AI_Interview({
 											))}
 										</div>
 									)}
-														<div style={{ width: '100%', display: "flex", alignItems: "center", justifyContent: 'space-between', gap: 12 }}>
-															<div style={{ display: 'inline-flex', alignItems: 'center', gap: 12 }}>
-																<button
+                                    <div style={{ width: '100%', display: "flex", alignItems: "center", justifyContent: 'space-between', gap: 12 }}>
+                                        <div style={{ display: 'inline-flex', alignItems: 'center', gap: 12 }}>
+											<button
 											type="button"
 											style={{
 												display: "inline-flex",
@@ -369,10 +456,17 @@ export default function Step3AI_Interview({
 												background: "#181D27",
 												color: "#FFFFFF",
 												fontSize: 13,
-												cursor: loadingIdx === idx || loadingAll ? "wait" : "pointer",
+													cursor: loadingIdx === idx || loadingAll ? "wait" : "pointer",
 											}}
-											onClick={() => (loadingIdx === null && !loadingAll ? generateForIndex(idx) : undefined)}
-										>
+												onClick={() => {
+													if (loadingIdx !== null || loadingAll) return;
+													if (!cat.showAskCount) {
+														revealAskCount(idx);
+														return;
+													}
+													generateForIndex(idx);
+												}}
+										    >
 											<img
                                                 className="m-1 invert"
                                                 src="/career_form_svg/star_white.svg"
@@ -381,39 +475,42 @@ export default function Step3AI_Interview({
                                                 alt="light bulb icon"
                                                 aria-hidden="true"
                                             />
-											{loadingIdx === idx ? "Generating..." : "Generate questions"}
-										</button>
-															<button
-											type="button"
-											style={{
-												display: "inline-flex",
-												alignItems: "center",
-												gap: 6,
-												padding: "8px 12px",
-												borderRadius: 30,
-												border: "1px solid #D5D7DA",
-												background: "#F9FAFB",
-												color: "#181D27",
-												fontSize: 13,
-												cursor: "default",
-											}}
-										>
-											<i className="la la-plus" aria-hidden="true"></i>
-											Manually add
-										</button>
-															</div>
-															<div style={{ display: 'inline-flex', alignItems: 'center', gap: 12 }}>
-											<span style={{ color: '#667085', fontSize: 12 }}># of questions to ask</span>
-											<input
-												type="number"
-												min={0}
-												max={20}
-												value={cat.askCount}
-												onChange={(e) => updateAskCount(idx, parseInt(e.target.value || "0", 10))}
-												style={{ width: 40, padding: '2px 8px', borderRadius: 999, border: '1px solid #D5D7DA', background: '#FFFFFF', color: '#181D27', fontSize: 13, textAlign: 'center' }}
-											/>
-										</div>
-														</div>
+											{loadingIdx === idx ? "Generating..." : cat.showAskCount ? "Generate now" : "Generate questions"}
+                                            </button>
+                                            <button
+                                                type="button"
+                                                style={{
+                                                    display: "inline-flex",
+                                                    alignItems: "center",
+                                                    gap: 6,
+                                                    padding: "8px 12px",
+                                                    borderRadius: 30,
+                                                    border: "1px solid #D5D7DA",
+                                                    background: "#F9FAFB",
+                                                    color: "#181D27",
+                                                    fontSize: 13,
+                                                    cursor: "pointer",
+                                                }}
+                                                onClick={() => addManualQuestion(idx)}
+                                            >
+                                                <i className="la la-plus" aria-hidden="true"></i>
+                                                Manually add
+                                            </button>
+								        </div>
+										{cat.showAskCount && (
+											<div style={{ display: 'inline-flex', alignItems: 'center', gap: 12 }}>
+												<span style={{ color: '#667085', fontSize: 12 }}># of questions to ask</span>
+												<input
+													type="text"
+													min={0}
+													max={20}
+													value={cat.askCount}
+													onChange={(e) => updateAskCount(idx, parseInt(e.target.value || "0", 10))}
+													style={{ width: 40, padding: '10px 8px', borderRadius: 10, border: '1px solid #D5D7DA', background: '#FFFFFF', color: '#181D27', fontSize: 13, textAlign: 'center' }}
+												/>
+											</div>
+										)}
+									</div>
 								</div>
 								{/* Divider under each category except last */}
 								{idx < categories.length - 1 && (
@@ -454,5 +551,7 @@ export default function Step3AI_Interview({
 			</div>
 		</div>
 	);
-}
+});
+
+export default Step3AI_Interview;
 
