@@ -97,17 +97,23 @@ export default function ProgressHeader({ step, totalSteps, currentStepPartial }:
                     style={{
                       height: "100%",
                       width: `${connectorFillPercent}%`,
-                      backgroundColor: "#181D27",
+                      background: `linear-gradient(
+                          90deg,
+                          #9fcaed 0%,
+                          #ceb6da 33%,
+                          #ebacc9 66%,
+                          #fccec0 100%
+                        )`,
                       transition: "width 0.4s ease",
                     }}
-                  />
+                    />
                 </div>
               )}
 
               {/* Label */}
               <span
                 style={{
-                  fontSize: "10px",
+                  fontSize: "15px",
                   color: isActive || isCompleted ? "#181D27" : "#6B7280",
                   fontWeight: isActive ? 600 : isCompleted ? 600 : 400,
                   marginTop: 6,
