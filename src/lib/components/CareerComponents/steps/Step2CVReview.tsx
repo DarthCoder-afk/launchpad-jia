@@ -294,12 +294,9 @@ export default function Step2CVReview({
 								{secretPrompt ? (
 									<pre style={{ margin: 0, whiteSpace: "pre-wrap", fontFamily: "inherit", lineHeight: 1.5 }}>{secretPrompt}</pre>
 								) : (
-									<ul style={{ margin: 0, paddingLeft: 18, listStyle: "disc", lineHeight: 1.5 }}>
-										<li>Prioritize candidates with strong hands-on experience in Java and object-oriented programming.</li>
-										<li>Look for familiarity with frameworks like Spring Boot or Hibernate, and experience building scalable backend systems.</li>
-										<li>Give extra weight to candidates who demonstrate knowledge of REST APIs, microservices, and SQL or NoSQL databases.</li>
-										<li>Deprioritize resumes that only list Java as a secondary or outdated skill.</li>
-									</ul>
+									<p className="text-md font-light text-gray-500">
+                                        Enter a secret prompt (e.g. Give higher fit scores to candidates who participate in hackathons or competitions.)
+                                    </p>
 								)}
 							</div>
 						</div>
