@@ -258,7 +258,15 @@ export default function Step2CVReview({
 						<div>
 							<div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 8 }}>
 								<h3 className="font-medium text-[#181D27]" style={{ fontWeight: 600, marginBottom: 0 }}>
-									<span style={{ marginRight: 4 }}>✨</span> CV Secret Prompt <span className="text-[#667085]" style={{ fontWeight: 400 }}>(optional)</span>
+									<span style={{ marginRight: 4 }}>
+                                         <img
+                                            src="/career_form_svg/star.svg"
+                                            width={16}
+                                            height={16}
+                                            alt="gradient star icon"
+                                            aria-hidden="true"
+                                        />
+                                    </span> CV Secret Prompt <span className="text-[#667085]" style={{ fontWeight: 400 }}>(optional)</span>
 								</h3>
 								<i
 									className="la la-question-circle"
@@ -557,7 +565,15 @@ export default function Step2CVReview({
 			{/* RIGHT COLUMN (Tips) */}
 			<div style={{ width: "40%", display: "flex", flexDirection: "column", gap: 16 }}>
 				<div className="layered-card-outer--solid rounded-2xl border border-[#E9EAEB] p-2" style={{ maxWidth: 340 }}>
-					<h3 className="text-lg font-semibold text-[#181D27] m-3">💡 Tips</h3>
+					<h3 className="text-lg font-semibold text-[#181D27] m-3"> 
+                        <img
+                        className="m-1"
+                        src="/career_form_svg/light_bulb.svg"
+                        width={20}
+                        height={20}
+                        alt="light bulb icon"
+                        aria-hidden="true"
+                    />Tips</h3>
 					<div className="layered-card-middle bg-white p-4 mb-2">
 						<ul style={{ paddingLeft: 0, marginTop: 8, color: "#414651", fontSize: 14, listStyle: "none" }}>
 							<li><strong>Add a Secret Prompt</strong> to fine-tune how Jia scores and evaluates submitted CVs.</li>
