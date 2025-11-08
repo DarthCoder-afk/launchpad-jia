@@ -1,10 +1,10 @@
 "use client";
 
-// Presentational-only component for Step 2 (CV Review & Pre-Screening)
-// No business logic or data persistence yet — just UI skeleton matching design.
+import CustomDropdown from "@/lib/components/CareerComponents/CustomDropdown";
 
 export interface Step2CVReviewProps {
-	screeningCriteria?: string; // e.g. "Good Fit and above"
+	screeningSetting?: string; // e.g. "Good Fit and above"
+	onChangeScreeningSetting?: (val: string) => void;
 	secretPrompt?: string; // raw prompt text
 	preScreeningQuestions?: Array<{ id: string; label: string }>; // future custom questions
 	suggestedQuestions?: Array<{ key: string; title: string; description: string }>; // default suggestions
@@ -19,7 +19,8 @@ const defaultSuggested = [
 ];
 
 export default function Step2CVReview({
-	screeningCriteria = "Good Fit and above",
+	screeningSetting = "Good Fit and above",
+	onChangeScreeningSetting,
 	secretPrompt,
 	preScreeningQuestions = [],
 	suggestedQuestions = defaultSuggested,
@@ -50,24 +51,13 @@ export default function Step2CVReview({
 							<p className="text-sm text-[#666666] mb-3">
 								Jia automatically endorses candidates who meet the chosen criteria.
 							</p>
-							<div
-								style={{
-									border: "1px solid #D5D7DA",
-									borderRadius: 12,
-									padding: 12,
-									display: "flex",
-									alignItems: "center",
-									justifyContent: "space-between",
-									cursor: "default",
-									background: "#F9FAFB",
-									fontSize: 14,
-									fontWeight: 500,
-									color: "#181D27",
-								}}
-							>
-								<span>{screeningCriteria}</span>
-								<i className="la la-angle-down" style={{ fontSize: 16, opacity: 0.35 }}></i>
-							</div>
+							<CustomDropdown
+								onSelectSetting={onChangeScreeningSetting}
+								screeningSetting={screeningSetting}
+								settingList={[{ name: "Good Fit and above" }, { name: "Only Strong Fit" }, { name: "No Automatic Promotion" }]}
+								placeholder="Choose screening criteria"
+							/>
+							
 						</div>
 
 						{/* Secret Prompt (optional) */}
