@@ -2,14 +2,35 @@
 
 import CustomDropdown from "@/lib/components/CareerComponents/CustomDropdown";
 
+type DropdownQuestion = {
+	id: string;
+	key: string;
+	title: string;
+	type: "dropdown";
+	options: Array<{ id: string; label: string }>;
+};
+
+type RangeQuestion = {
+	id: string;
+	key: string;
+	title: string;
+	type: "range";
+	min?: string;
+	max?: string;
+	currency?: string;
+};
+
+export type PreScreeningQuestion = DropdownQuestion | RangeQuestion;
+
 export interface Step2CVReviewProps {
 	screeningSetting?: string; // e.g. "Good Fit and above"
 	onChangeScreeningSetting?: (val: string) => void;
 	secretPrompt?: string; // raw prompt text
-	preScreeningQuestions?: Array<{ id: string; label: string }>; // future custom questions
+	preScreeningQuestions: PreScreeningQuestion[];
+	setPreScreeningQuestions: (updater: PreScreeningQuestion[] | ((prev: PreScreeningQuestion[]) => PreScreeningQuestion[])) => void;
 	suggestedQuestions?: Array<{ key: string; title: string; description: string }>; // default suggestions
-	onAddSuggested?: (key: string) => void; // stub handler (unused for now)
-	onAddCustom?: () => void; // stub handler (unused for now)
+	onAddSuggested?: (key: string) => void; // optional external hook
+	onAddCustom?: () => void; // stub handler (optional)
 }
 
 const defaultSuggested = [
@@ -18,13 +39,112 @@ const defaultSuggested = [
 	{ key: "askingSalary", title: "Asking Salary", description: "How much is your expected monthly salary?" },
 ];
 
+function uid(prefix = "id") {
+	return `${prefix}_${Math.random().toString(36).slice(2, 8)}_${Date.now().toString(36).slice(-4)}`;
+}
+
 export default function Step2CVReview({
 	screeningSetting = "Good Fit and above",
 	onChangeScreeningSetting,
 	secretPrompt,
-	preScreeningQuestions = [],
+	preScreeningQuestions,
+	setPreScreeningQuestions,
 	suggestedQuestions = defaultSuggested,
 }: Step2CVReviewProps) {
+	const isAdded = (key: string) => preScreeningQuestions.some((q) => q.key === key);
+
+	const addSuggestedQuestion = (key: string) => {
+		if (isAdded(key)) return;
+		const map: Record<string, PreScreeningQuestion> = {
+			noticePeriod: {
+				id: uid("q"),
+				key: "noticePeriod",
+				title: "How long is your notice period?",
+				type: "dropdown",
+				options: [
+					{ id: uid("opt"), label: "Immediately" },
+					{ id: uid("opt"), label: "< 30 days" },
+					{ id: uid("opt"), label: "> 30 days" },
+				],
+			},
+			workSetup: {
+				id: uid("q"),
+				key: "workSetup",
+				title: "How often are you willing to report to the office?",
+				type: "dropdown",
+				options: [
+					{ id: uid("opt"), label: "At most 1-2x a week" },
+					{ id: uid("opt"), label: "At most 3-4x a week" },
+					{ id: uid("opt"), label: "Open to fully onsite work" },
+					{ id: uid("opt"), label: "Only open to fully remote work" },
+				],
+			},
+			askingSalary: {
+				id: uid("q"),
+				key: "askingSalary",
+				title: "How much is your expected monthly salary?",
+				type: "range",
+				min: "",
+				max: "",
+				currency: "PHP",
+			},
+		};
+		const toAdd = map[key];
+		if (toAdd) {
+			setPreScreeningQuestions((prev) => [...prev, toAdd]);
+		}
+	};
+
+	const removeQuestion = (id: string) => {
+		setPreScreeningQuestions((prev) => prev.filter((q) => q.id !== id));
+	};
+
+	const addOption = (qid: string) => {
+		setPreScreeningQuestions((prev) =>
+			prev.map((q) => {
+				if (q.id === qid && q.type === "dropdown") {
+					return { ...q, options: [...q.options, { id: uid("opt"), label: "" }] };
+				}
+				return q;
+			})
+		);
+	};
+
+	const removeOption = (qid: string, optId: string) => {
+		setPreScreeningQuestions((prev) =>
+			prev.map((q) => {
+				if (q.id === qid && q.type === "dropdown") {
+					return { ...q, options: q.options.filter((o) => o.id !== optId) };
+				}
+				return q;
+			})
+		);
+	};
+
+	const updateOptionLabel = (qid: string, optId: string, label: string) => {
+		setPreScreeningQuestions((prev) =>
+			prev.map((q) => {
+				if (q.id === qid && q.type === "dropdown") {
+					return {
+						...q,
+						options: q.options.map((o) => (o.id === optId ? { ...o, label } : o)),
+					};
+				}
+				return q;
+			})
+		);
+	};
+
+	const updateRange = (qid: string, field: "min" | "max" | "currency", value: string) => {
+		setPreScreeningQuestions((prev) =>
+			prev.map((q) => {
+				if (q.id === qid && q.type === "range") {
+					return { ...q, [field]: value } as RangeQuestion;
+				}
+				return q;
+			})
+		);
+	};
 	return (
 		<div
 			style={{
@@ -162,10 +282,201 @@ export default function Step2CVReview({
 					<div className="layered-card-middle bg-white p-4 mb-2" style={{ gap: 20 }}>
 						
 
-						{/* Current questions list (placeholder) */}
-						{preScreeningQuestions.length === 0 && (
+						{/* Current questions list */}
+						{preScreeningQuestions.length === 0 ? (
 							<div style={{ fontSize: 14, color: '#414651', paddingTop: 4, paddingBottom: 12 }}>
 								No pre-screening questions added yet.
+							</div>
+						) : (
+							<div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+								{preScreeningQuestions.map((q, qIdx) => (
+									<div key={q.id} className="rounded-xl border border-[#E9EAEB] bg-[#F9FAFB]" style={{ padding: 16 }}>
+										<div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12 }}>
+											<div style={{ fontSize: 14, fontWeight: 600, color: "#181D27" }}>{q.title}</div>
+											<div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+												<div
+													style={{
+														display: "inline-flex",
+														alignItems: "center",
+														gap: 6,
+														border: "1px solid #E9EAEB",
+														padding: "6px 10px",
+														borderRadius: 999,
+														background: "#FFFFFF",
+														color: "#181D27",
+														fontSize: 13,
+													}}
+													title={q.type === "dropdown" ? "Dropdown" : "Range"}
+												>
+													<i className="la la-sliders-h" style={{ fontSize: 14 }}></i>
+													{q.type === "dropdown" ? "Dropdown" : "Range"}
+													<i className="la la-angle-down" style={{ fontSize: 14, color: "#667085" }}></i>
+												</div>
+												<button
+													onClick={() => removeQuestion(q.id)}
+													style={{
+														border: "1px solid #EE5D50",
+														color: "#EE5D50",
+														background: "#FFFFFF",
+														padding: "8px 12px",
+														borderRadius: 999,
+														fontSize: 13,
+														fontWeight: 500,
+													}}
+												>
+													<i className="la la-trash mr-1"></i> Delete Question
+												</button>
+											</div>
+										</div>
+
+										{/* Body */}
+										{q.type === "dropdown" ? (
+											<div style={{ marginTop: 12, display: "flex", flexDirection: "column", gap: 10 }}>
+												{q.options.map((opt, idx) => (
+													<div key={opt.id} style={{ display: "flex", alignItems: "center", gap: 8 }}>
+														<div
+															style={{
+																width: 30,
+																textAlign: "center",
+																border: "1px solid #E9EAEB",
+																background: "#FFFFFF",
+																borderRadius: 8,
+																color: "#181D27",
+																fontSize: 13,
+																padding: "6px 0",
+															}}
+														>
+															{idx + 1}
+														</div>
+														<input
+															value={opt.label}
+															onChange={(e) => updateOptionLabel(q.id, opt.id, e.target.value)}
+															placeholder={`Option ${idx + 1}`}
+															style={{
+																flex: 1,
+																border: "1px solid #E9EAEB",
+																borderRadius: 8,
+																padding: "10px 12px",
+																background: "#FFFFFF",
+																fontSize: 14,
+																color: "#181D27",
+															}}
+														/>
+														<button
+															onClick={() => removeOption(q.id, opt.id)}
+															style={{
+																width: 28,
+																height: 28,
+																display: "inline-flex",
+																alignItems: "center",
+																justifyContent: "center",
+																borderRadius: 999,
+																border: "1px solid #E9EAEB",
+																background: "#FFFFFF",
+																color: "#667085",
+															}}
+															aria-label="Remove option"
+														>
+															<i className="la la-times"></i>
+														</button>
+													</div>
+												))}
+												<button
+													onClick={() => addOption(q.id)}
+													style={{
+														display: "inline-flex",
+														alignItems: "center",
+														gap: 8,
+														padding: 0,
+														border: "none",
+														background: "transparent",
+														color: "#181D27",
+														fontWeight: 500,
+														fontSize: 14,
+														marginTop: 2,
+													}}
+												>
+													<span style={{ fontSize: 18, lineHeight: 1 }}>+</span> Add Option
+												</button>
+											</div>
+										) : (
+											<div style={{ marginTop: 12, display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
+												<div>
+													<div style={{ fontSize: 12, color: "#667085", marginBottom: 6 }}>Minimum</div>
+													<div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+														<div style={{ position: "relative", flex: 1 }}>
+															<span style={{ position: "absolute", left: 10, top: 10, color: "#667085" }}>₱</span>
+															<input
+																value={(q as RangeQuestion).min || ""}
+																onChange={(e) => updateRange(q.id, "min", e.target.value)}
+																placeholder="40,000"
+																style={{
+																	width: "100%",
+																	border: "1px solid #E9EAEB",
+																	borderRadius: 8,
+																	padding: "10px 12px 10px 24px",
+																	background: "#FFFFFF",
+																	fontSize: 14,
+																}}
+															/>
+														</div>
+														<div
+															style={{
+																border: "1px solid #E9EAEB",
+																borderRadius: 8,
+																padding: "8px 10px",
+																background: "#FFFFFF",
+																color: "#181D27",
+																minWidth: 68,
+																textAlign: "center",
+															}}
+															title="Currency"
+														>
+															{(q as RangeQuestion).currency || "PHP"}
+															<i className="la la-angle-down" style={{ marginLeft: 6, color: "#667085" }}></i>
+														</div>
+													</div>
+												</div>
+												<div>
+													<div style={{ fontSize: 12, color: "#667085", marginBottom: 6 }}>Maximum</div>
+													<div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+														<div style={{ position: "relative", flex: 1 }}>
+															<span style={{ position: "absolute", left: 10, top: 10, color: "#667085" }}>₱</span>
+															<input
+																value={(q as RangeQuestion).max || ""}
+																onChange={(e) => updateRange(q.id, "max", e.target.value)}
+																placeholder="60,000"
+																style={{
+																	width: "100%",
+																	border: "1px solid #E9EAEB",
+																	borderRadius: 8,
+																	padding: "10px 12px 10px 24px",
+																	background: "#FFFFFF",
+																	fontSize: 14,
+																}}
+															/>
+														</div>
+														<div
+															style={{
+																border: "1px solid #E9EAEB",
+																borderRadius: 8,
+																padding: "8px 10px",
+																background: "#FFFFFF",
+																color: "#181D27",
+																minWidth: 68,
+																textAlign: "center",
+															}}
+															title="Currency"
+														>
+															{(q as RangeQuestion).currency || "PHP"}
+															<i className="la la-angle-down" style={{ marginLeft: 6, color: "#667085" }}></i>
+														</div>
+													</div>
+												</div>
+											</div>
+										)}
+									</div>
+								))}
 							</div>
 						)}
 						{/* Separator */}
@@ -193,21 +504,37 @@ export default function Step2CVReview({
 											<div style={{ fontSize: 14, fontWeight: 600, color: "#181D27" }}>{q.title}</div>
 											<div style={{ fontSize: 13, color: "#667085", marginTop: 2 }}>{q.description}</div>
 										</div>
-										<button
-											style={{
-												padding: "6px 14px",
-												borderRadius: 30,
-												border: "1px solid #D5D7DA",
-												background: "#F9FAFB",
-												fontSize: 13,
-												fontWeight: 500,
-												color: "#181D27",
-												cursor: "default",
-											}}
-											disabled
-										>
-											Add
-										</button>
+										{isAdded(q.key) ? (
+											<span
+												style={{
+													padding: "6px 14px",
+													borderRadius: 30,
+													border: "1px solid #D5D7DA",
+													background: "#F9FAFB",
+													fontSize: 13,
+													fontWeight: 500,
+													color: "#667085",
+												}}
+											>
+												Added
+											</span>
+										) : (
+											<button
+												onClick={() => addSuggestedQuestion(q.key)}
+												style={{
+													padding: "6px 14px",
+													borderRadius: 30,
+													border: "1px solid #D5D7DA",
+													background: "#F9FAFB",
+													fontSize: 13,
+													fontWeight: 500,
+													color: "#181D27",
+													cursor: "pointer",
+												}}
+											>
+												Add
+											</button>
+										)}
 									</div>
 								))}
 							</div>
