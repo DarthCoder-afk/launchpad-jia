@@ -4,9 +4,10 @@ interface ProgressHeaderProps {
   step: number;              // current active step (1-indexed)
   totalSteps: number;        // total number of steps
   currentStepPartial?: boolean; // when true, show the connector to the next step as half-filled
+  forceStep2Half?: boolean;     // always render 50% progress between step 2 and 3 (optional-heavy step)
 }
 
-export default function ProgressHeader({ step, totalSteps, currentStepPartial }: ProgressHeaderProps) {
+export default function ProgressHeader({ step, totalSteps, currentStepPartial, forceStep2Half }: ProgressHeaderProps) {
   const steps = [
     "Career Details & Team Access",
     "CV Review & Pre-screening",
@@ -31,8 +32,14 @@ export default function ProgressHeader({ step, totalSteps, currentStepPartial }:
           //  - Active (no partial) or not reached yet: 0%
           let connectorFillPercent = 0;
           if (!isLast) {
-            if (isCompleted) connectorFillPercent = 100;
-            else if (isActive && currentStepPartial) connectorFillPercent = 50;
+            if (isCompleted) {
+              connectorFillPercent = 100;
+            } else if (isActive && currentStepPartial) {
+              connectorFillPercent = 50;
+            } else if (forceStep2Half && stepNumber === 2) {
+              // show a pre-filled half connector leaving step 2 toward step 3
+              connectorFillPercent = 50;
+            }
           }
 
           return (
