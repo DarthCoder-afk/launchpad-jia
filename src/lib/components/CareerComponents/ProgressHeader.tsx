@@ -86,7 +86,7 @@ export default function ProgressHeader({ step, totalSteps, currentStepPartial }:
                     top: 10,
                     left: "50%",
                     width: "100%",
-                    height: 2,
+                    height: 4,
                     backgroundColor: "#E5E7EB",
                     zIndex: 0,
                     overflow: "hidden",
