@@ -532,6 +532,19 @@ export default function Step2CVReview({
 															</div>
 														</div>
 													</div>
+                                                     {/* Separator */}
+						                            <div style={{ height: 1, background: '#E9EAEB', width: '200%', marginBottom: 16 }} />
+
+													<div style={{ display: "flex", justifyContent: "flex-end" }}>
+														<button
+															onClick={() => removeQuestion(q.id)}
+															style={{ display: "inline-flex", alignItems: "center", gap: 8, border: "2px solid #EE5D50", color: "#EE5D50", background: "#FFFFFF", padding: "10px 14px", borderRadius: 999, fontSize: 13, fontWeight: 500, cursor: "pointer", marginTop: 16 }}
+															aria-label="Delete question"
+														    >
+															<i className="la la-trash text-xl" aria-hidden="true"></i>
+															<span className="text-bold text-md">Delete Question</span>
+														</button>
+													</div>
 												</div>
 											)}
 											{q.type === "short" && (
