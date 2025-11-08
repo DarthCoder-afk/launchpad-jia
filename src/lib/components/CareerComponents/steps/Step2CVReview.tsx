@@ -219,6 +219,24 @@ export default function Step2CVReview({
 		);
 		setTypeMenuOpenFor(null);
 	};
+
+		// Map question type to an icon class (Line Awesome) and optional color
+		const typeIconClass = (t: PreScreeningQuestion["type"]) => {
+			switch (t) {
+				case "short":
+					return { cls: "las la-user", color: "#667085" }; // text lines icon
+				case "long":
+					return { cls: "las la-align-left", color: "#667085" }; // paragraph icon
+				case "dropdown":
+					return { cls: "las la-user", color: "#667085" }; // list icon
+				case "checkboxes":
+					return { cls: "las la-user", color: "#667085" }; // checkbox icon
+				case "range":
+					return { cls: "la la-sort-numeric-up", color: "#667085" }; // numeric range icon
+				default:
+					return { cls: "la la-question-circle", color: "#667085" }; // fallback
+			}
+		};
 	return (
 		<div
 			style={{
@@ -366,43 +384,58 @@ export default function Step2CVReview({
 								No pre-screening questions added yet.
 							</div>
 						) : (
-							<div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+							<div style={{ display: "flex", flexDirection: "column", gap: 16, width: "100%" }}>
 									{preScreeningQuestions.map((q) => (
-										<div key={q.id} className="rounded-xl border border-[#E9EAEB] bg-[#F9FAFB]" style={{ padding: 16 }}>
+										<div key={q.id} className="border border-[#E9EAEB] bg-[#F9FAFB]" style={{ borderRadius:12 }}>
 											{/* Header row */}
-											<div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12 }}>
-												<input
-													value={q.title}
-													onChange={(e) => updateQuestionTitle(q.id, e.target.value)}
-													placeholder="Write your question..."
-													style={{ flex: 1, border: "1px solid #E9EAEB", borderRadius: 10, padding: "10px 12px", background: "#FFFFFF", fontSize: 14 }}
-												/>
+											<div
+												className="layered-card-outer--solid"
+												style={{
+													display: "flex",
+													alignItems: "center",
+													justifyContent: "space-between",
+													gap: 12,
+													marginBottom: 8,
+                                                    marginTop: 0,
+													background: "#F6F7F9",
+													padding: "10px 12px",
+													borderRadius: 5,
+												}}
+											>
+												<p style={{ padding: 16, margin: 0, fontSize: 14, fontWeight: 600, color: "#181D27" }}>{q.title}</p>
 												<div style={{ position: "relative" }}>
 													<button
 														onClick={() => setTypeMenuOpenFor((cur) => (cur === q.id ? null : q.id))}
 														style={{
 															display: "inline-flex",
 															alignItems: "center",
-															gap: 6,
+															gap: 8,
 															border: "1px solid #E9EAEB",
-															padding: "8px 12px",
-															borderRadius: 999,
+															padding: "10px 12px",
+															borderRadius: 9,
 															background: "#FFFFFF",
 															color: "#181D27",
 															fontSize: 13,
-															minWidth: 140,
+															minWidth: 200,
 															justifyContent: "space-between",
 														}}
 													>
-														{q.type === "short"
-															? "Short Answer"
-															: q.type === "long"
-															? "Long Answer"
-															: q.type === "dropdown"
-															? "Dropdown"
-															: q.type === "checkboxes"
-															? "Checkboxes"
-															: "Range"}
+														<span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+															<i
+																className={typeIconClass(q.type).cls}
+																style={{ fontSize: 14, color: typeIconClass(q.type).color }}
+																aria-hidden="true"
+															></i>
+															{q.type === "short"
+																? "Short Answer"
+																: q.type === "long"
+																? "Long Answer"
+																: q.type === "dropdown"
+																? "Dropdown"
+																: q.type === "checkboxes"
+																? "Checkboxes"
+																: "Range"}
+														</span>
 														<i className="la la-angle-down" style={{ fontSize: 14, color: "#667085" }}></i>
 													</button>
 													{typeMenuOpenFor === q.id && (
@@ -417,42 +450,62 @@ export default function Step2CVReview({
 																<div
 																	key={item.key}
 																	onClick={() => changeQuestionType(q.id, item.key as PreScreeningQuestion["type"])}
-																	style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "10px 12px", cursor: "pointer", fontSize: 14 }}
+																	style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "10px 12px", cursor: "pointer", fontSize: 14, gap: 10 }}
 																>
-																	<span>{item.label}</span>
-																	{q.type === item.key && <i className="la la-check"></i>}
+																	<span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+																		<i className={typeIconClass(item.key as PreScreeningQuestion["type"]).cls} style={{ fontSize: 14, color: typeIconClass(item.key as PreScreeningQuestion["type"]).color }} aria-hidden="true"></i>
+																		{item.label}
+																	</span>
+																	{q.type === item.key && <i className="la la-check" style={{ color: '#181D27' }}></i>}
 																</div>
 															))}
 														</div>
 													)}
 												</div>
-												<button
-													onClick={() => removeQuestion(q.id)}
-													style={{ border: "1px solid #EE5D50", color: "#EE5D50", background: "#FFFFFF", padding: "8px 12px", borderRadius: 999, fontSize: 13, fontWeight: 500 }}
-												>
-													<i className="la la-trash mr-1"></i> Delete
-												</button>
+												
 											</div>
 
 											{/* Body */}
 											{(q.type === "dropdown" || q.type === "checkboxes") && (
-												<div style={{ marginTop: 12, display: "flex", flexDirection: "column", gap: 10 }}>
+												<div style={{ padding: 20, marginTop: 12, display: "flex", flexDirection: "column", gap: 10 }}>
 													{(q as DropdownQuestion | CheckboxesQuestion).options.map((opt, idx) => (
 														<div key={opt.id} style={{ display: "flex", alignItems: "center", gap: 8 }}>
-															<div style={{ width: 30, textAlign: "center", border: "1px solid #E9EAEB", background: "#FFFFFF", borderRadius: 8, color: "#181D27", fontSize: 13, padding: "6px 0" }}>{idx + 1}</div>
-															<input value={opt.label} onChange={(e) => updateOptionLabel(q.id, opt.id, e.target.value)} placeholder={`Option ${idx + 1}`} style={{ flex: 1, border: "1px solid #E9EAEB", borderRadius: 8, padding: "10px 12px", background: "#FFFFFF", fontSize: 14 }} />
+															{/* Shell to match rounded pill with internal divider */}
+															<div style={{ display: "flex", alignItems: "center", flex: 1, border: "1px solid #E9EAEB", background: "#FFFFFF", borderRadius: 12, overflow: "hidden" }}>
+																<div style={{ minWidth: 44, textAlign: "center", color: "#181D27", fontSize: 13, padding: "10px 0", borderRight: "1px solid #E9EAEB" }}>{idx + 1}</div>
+																<input
+																	value={opt.label}
+																	onChange={(e) => updateOptionLabel(q.id, opt.id, e.target.value)}
+																	placeholder={`Option ${idx + 1}`}
+																	style={{ flex: 1, border: "none", outline: "none", padding: "10px 12px", background: "transparent", fontSize: 14, color: "#181D27" }}
+																/>
+															</div>
 															<button onClick={() => removeOption(q.id, opt.id)} style={{ width: 28, height: 28, display: "inline-flex", alignItems: "center", justifyContent: "center", borderRadius: 999, border: "1px solid #E9EAEB", background: "#FFFFFF", color: "#667085" }} aria-label="Remove option">
 																<i className="la la-times"></i>
 															</button>
 														</div>
 													))}
-													<button onClick={() => addOption(q.id)} style={{ display: "inline-flex", alignItems: "center", gap: 8, padding: 0, border: "none", background: "transparent", color: "#181D27", fontWeight: 500, fontSize: 14, marginTop: 2 }}>
+													<button onClick={() => addOption(q.id)} style={{ display: "inline-flex", alignItems: "center", gap: 8, padding: 0, border: "none", background: "transparent", color: "#181D27", fontWeight: 500, fontSize: 14, marginTop: 2, cursor: "pointer"   }}>
 														<span style={{ fontSize: 18, lineHeight: 1 }}>+</span> Add Option
 													</button>
+
+                                                    {/* Separator */}
+						                            <div style={{ height: 1, background: '#E9EAEB', width: '100%', marginBottom: 16 }} />
+
+													<div style={{ display: "flex", justifyContent: "flex-end" }}>
+														<button
+															onClick={() => removeQuestion(q.id)}
+															style={{ display: "inline-flex", alignItems: "center", gap: 8, border: "2px solid #EE5D50", color: "#EE5D50", background: "#FFFFFF", padding: "10px 14px", borderRadius: 999, fontSize: 13, fontWeight: 500, cursor: "pointer" }}
+															aria-label="Delete question"
+														>
+															<i className="la la-trash text-xl" aria-hidden="true"></i>
+															<span className="text-bold text-md">Delete Question</span>
+														</button>
+													</div>
 												</div>
 											)}
 											{q.type === "range" && (
-												<div style={{ marginTop: 12, display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
+												<div style={{ padding: 20, marginTop: 12, display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
 													<div>
 														<div style={{ fontSize: 12, color: "#667085", marginBottom: 6 }}>Minimum</div>
 														<div style={{ display: "flex", alignItems: "center", gap: 8 }}>
@@ -482,13 +535,13 @@ export default function Step2CVReview({
 												</div>
 											)}
 											{q.type === "short" && (
-												<div style={{ marginTop: 12 }}>
-													<input disabled placeholder="Short answer" style={{ width: "100%", border: "1px dashed #E9EAEB", borderRadius: 8, padding: "10px 12px", background: "#FFFFFF", fontSize: 14, color: "#667085" }} />
+												<div style={{ padding: 20, marginTop: 12 }}>
+													<input  placeholder="Short answer" style={{ width: "100%", border: "1px dashed #E9EAEB", borderRadius: 8, padding: "10px 12px", background: "#FFFFFF", fontSize: 14, color: "#667085" }} />
 												</div>
 											)}
 											{q.type === "long" && (
-												<div style={{ marginTop: 12 }}>
-													<textarea disabled placeholder="Long answer" rows={3} style={{ width: "100%", border: "1px dashed #E9EAEB", borderRadius: 8, padding: "10px 12px", background: "#FFFFFF", fontSize: 14, color: "#667085", resize: "vertical" }} />
+												<div style={{ padding: 20, marginTop: 12 }}>
+													<textarea  placeholder="Long answer" rows={3} style={{ width: "100%", border: "1px dashed #E9EAEB", borderRadius: 8, padding: "10px 12px", background: "#FFFFFF", fontSize: 14, color: "#667085", resize: "vertical" }} />
 												</div>
 											)}
 										</div>
