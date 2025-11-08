@@ -12,6 +12,7 @@ import CareerActionModal from "./CareerActionModal";
 import FullScreenLoadingAnimation from "./FullScreenLoadingAnimation";
 import ProgressHeader from "./ProgressHeader";
 import Step1CareerDetails from "./steps/Step1CareerDetails";
+import Step2CVReview from "./steps/Step2CVReview";
   // Setting List icons
   const screeningSettingList = [
     {
@@ -612,6 +613,8 @@ export default function CareerForm({ career, formType, setShowEditModal }: { car
              return false;
            })()}
          />
+          {/* Separator */}
+					<div className="max-w-full mx-auto" style={{ height: 1, background: '#E9EAEB', width: '85%', marginBottom: 20 }} />
           {step === 1 && (
              <Step1CareerDetails
                     jobTitle={jobTitle}
