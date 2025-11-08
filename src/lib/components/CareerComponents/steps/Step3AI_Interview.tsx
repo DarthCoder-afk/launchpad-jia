@@ -82,32 +82,16 @@ export default function Step3AI_Interview() {
 								</div>
 								{/* Static ON toggle with Yes label */}
 								<div style={{ display: "inline-flex", alignItems: "center", gap: 10 }}>
-									<div
-										aria-hidden
-										style={{
-											width: 44,
-											height: 24,
-											background: "#EE5D50",
-											borderRadius: 999,
-											position: "relative",
-											boxShadow: "inset 0 0 0 1px rgba(0,0,0,0.06)",
-										}}
-									>
-										<span
-											style={{
-												position: "absolute",
-												left: 22,
-												top: 2,
-												width: 20,
-												height: 20,
-												background: "#FFFFFF",
-												borderRadius: 999,
-												boxShadow: "0 1px 2px rgba(0,0,0,0.12)",
-											}}
-										/>
-									</div>
-									<span className="text-sm" style={{ color: "#667085" }}>Yes</span>
-								</div>
+									<label className="switch" style={{ margin: 0 }}>
+                                    <input
+                                        type="checkbox"
+                                        checked={null}
+                                        readOnly
+                                    />
+                                    <span className="slider round"></span>
+                                    </label>
+                                    <span style={{ fontSize: 14, color: "#181D27", fontWeight: 500 }}>Yes</span>
+                                    </div>
 							</div>
 						</div>
 
@@ -119,7 +103,14 @@ export default function Step3AI_Interview() {
 							<div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 8 }}>
 								<h3 className="font-medium text-[#181D27]" style={{ fontWeight: 600, marginBottom: 0 }}>
 									<span style={{ marginRight: 4 }}>
-										<i className="la la-magic" aria-hidden="true" style={{ color: "#EE5D50" }}></i>
+										  <img
+                                            className="m-1"
+                                            src="/career_form_svg/star.svg"
+                                            width={20}
+                                            height={20}
+                                            alt="light bulb icon"
+                                            aria-hidden="true"
+                                        />
 									</span>
 									AI Interview Secret Prompt <span className="text-[#667085]" style={{ fontWeight: 400 }}>(optional)</span>
 								</h3>
@@ -159,14 +150,32 @@ export default function Step3AI_Interview() {
 						className="flex w-full flex-nowrap items-center justify-between gap-3 px-4 py-3"
 						style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "nowrap", gap: 12 }}
 					>
-						<h2
-							className="text-lg font-semibold text-[#181D27] m-0 leading-none flex items-center flex-1 min-w-0"
-							style={{ lineHeight: 1, margin: 0, display: "flex", alignItems: "center", flex: 1, minWidth: 0 }}
-						>
-							<span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-								2. AI Interview Questions <i className="la la-info-circle" style={{ marginLeft: 6, color: "#667085", fontSize: 14 }}></i>
-							</span>
-						</h2>
+                        <h2
+                            className="text-lg font-semibold text-[#181D27] m-0 leading-none flex items-center flex-1 min-w-0"
+                            style={{ lineHeight: 1, margin: 0, display: "flex", alignItems: "center", flex: 1, minWidth: 0 }}
+                        >
+                            <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                                2. AI Interview Questions
+                                <span className="text-[#667085] font-normal" style={{ fontWeight: 400 }}> (optional)</span>
+                            </span>
+                            <span
+                                className="inline-block align-middle ml-2"
+                                style={{
+                                    fontSize: 12,
+                                    lineHeight: '18px',
+                                    padding: '1px 7px',
+                                    borderRadius: 999,
+                                    border: '1px solid #D5D7DA',
+                                    background: '#FFFFFF',
+                                    color: '#181D27',
+                                    fontWeight: 500,
+                                    
+                                }}
+                                aria-label="AI interview questions count"
+                            >
+                                0{/* {InterviewQuestions.length} */}
+                            </span>
+                        </h2>
 
 						<button
 							type="button"
@@ -186,7 +195,14 @@ export default function Step3AI_Interview() {
 							}}
 							aria-label="Generate all questions"
 						>
-							<i className="la la-magic" aria-hidden="true"></i>
+							<img
+                                className="m-1 invert"
+                                src="/career_form_svg/star_white.svg"
+                                width={13}
+                                height={13}
+                                alt="light bulb icon"
+                                aria-hidden="true"
+                            />
 							Generate all questions
 						</button>
 					</div>
@@ -194,19 +210,17 @@ export default function Step3AI_Interview() {
 						{categories.map((label, idx) => (
 							<div key={label}>
 								<div
-									className="layered-card-outer--solid"
 									style={{
 										display: "flex",
-										alignItems: "center",
-										justifyContent: "space-between",
-										gap: 12,
-										background: "#F6F7F9",
+										flexDirection: "column",
+										alignItems: "flex-start",
+										gap: 10,
 										padding: "10px 12px",
 										borderRadius: 5,
 									}}
 								>
-									<p style={{ padding: 6, margin: 0, fontSize: 14, fontWeight: 600, color: "#181D27" }}>{label}</p>
-									<div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+									<p style={{ margin: 0, fontSize: 14, fontWeight: 600, color: "#181D27" }}>{label}</p>
+									<div style={{ display: "flex", alignItems: "center", gap: 12 }}>
 										<button
 											type="button"
 											style={{
@@ -222,7 +236,14 @@ export default function Step3AI_Interview() {
 												cursor: "default",
 											}}
 										>
-											<i className="la la-magic" aria-hidden="true"></i>
+											<img
+                                                className="m-1 invert"
+                                                src="/career_form_svg/star_white.svg"
+                                                width={13}
+                                                height={13}
+                                                alt="light bulb icon"
+                                                aria-hidden="true"
+                                            />
 											Generate questions
 										</button>
 										<button
@@ -247,7 +268,7 @@ export default function Step3AI_Interview() {
 								</div>
 								{/* Divider under each category except last */}
 								{idx < categories.length - 1 && (
-									<div style={{ height: 1, background: "#E9EAEB", width: "100%", margin: "12px 0" }} />
+										<div style={{ height: 1, background: "#E9EAEB", width: "100%", margin: "14px 0" }} />
 								)}
 							</div>
 						))}
@@ -259,7 +280,14 @@ export default function Step3AI_Interview() {
 			<div style={{ width: "40%", display: "flex", flexDirection: "column", gap: 16 }}>
 				<div className="layered-card-outer--solid rounded-2xl border border-[#E9EAEB] p-2" style={{ maxWidth: 340 }}>
 					<h3 className="text-lg font-semibold text-[#181D27] m-3">
-						<i className="la la-lightbulb-o" style={{ marginRight: 6 }} aria-hidden="true"></i>
+						<img
+                            className="m-1"
+                            src="/career_form_svg/light_bulb.svg"
+                            width={20}
+                            height={20}
+                            alt="light bulb icon"
+                            aria-hidden="true"
+                        />
 						Tips
 					</h3>
 					<div className="layered-card-middle bg-white p-4 mb-2">
