@@ -1,9 +1,6 @@
 "use client"
 
 import { useEffect, useRef, useState } from "react";
-import InterviewQuestionGeneratorV2 from "./InterviewQuestionGeneratorV2";
-import RichTextEditor from "@/lib/components/CareerComponents/RichTextEditor";
-import CustomDropdown from "@/lib/components/CareerComponents/CustomDropdown";
 import philippineCitiesAndProvinces from "../../../../public/philippines-locations.json";
 import { candidateActionToast, errorToast } from "@/lib/Utils";
 import { useAppContext } from "@/lib/context/AppContext";
@@ -13,41 +10,7 @@ import FullScreenLoadingAnimation from "./FullScreenLoadingAnimation";
 import ProgressHeader from "./ProgressHeader";
 import Step1CareerDetails from "./steps/Step1CareerDetails";
 import Step2CVReview from "./steps/Step2CVReview";
-  // Setting List icons
-  const screeningSettingList = [
-    {
-        name: "Good Fit and above",
-        icon: "la la-check",
-    },
-    {
-        name: "Only Strong Fit",
-        icon: "la la-check-double",
-    },
-    {
-        name: "No Automatic Promotion",
-        icon: "la la-times",
-    },
-];
-const workSetupOptions = [
-    {
-        name: "Fully Remote",
-    },
-    {
-        name: "Onsite",
-    },
-    {
-        name: "Hybrid",
-    },
-];
-
-const employmentTypeOptions = [
-    {
-        name: "Full-Time",
-    },
-    {
-        name: "Part-Time",
-    },
-];
+  // (Removed local option lists and unused UI imports to keep this component lean)
 
 export default function CareerForm({ career, formType, setShowEditModal }: { career?: any, formType: string, setShowEditModal?: (show: boolean) => void }) {
     const { user, orgID } = useAppContext();
