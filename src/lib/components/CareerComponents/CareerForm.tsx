@@ -98,6 +98,8 @@ export default function CareerForm({ career, formType, setShowEditModal }: { car
     const [city, setCity] = useState(career?.location || "");
     const [provinceList, setProvinceList] = useState([]);
     const [cityList, setCityList] = useState([]);
+  // Step 2: Pre-screening questions (local only for now)
+  const [preScreeningQuestions, setPreScreeningQuestions] = useState<any[]>([]);
     const [showSaveModal, setShowSaveModal] = useState("");
     const [isSavingCareer, setIsSavingCareer] = useState(false);
     const savingCareerRef = useRef(false);
@@ -492,7 +494,7 @@ export default function CareerForm({ career, formType, setShowEditModal }: { car
           
         {formType === "add" ? (
           <div style={{ marginBottom: "35px", display: "flex", flexDirection: "row", justifyContent: "space-between", alignItems: "center", width: "100%" }}>
-              <h1 style={{ fontSize: "24px", fontWeight: 550, color: "#111827" }}>Add new career</h1>
+              <h1 style={{ fontSize: "24px", fontWeight: 550, color: "#111827" }}>{step > 1 ? `[Draft] ${jobTitle?.trim() || "Untitled Role"}` : "Add new career"}</h1>
               <div style={{ display: "flex", flexDirection: "row", alignItems: "center", gap: "10px" }}>
                  <button
                       disabled={!isFormValid() || isSavingCareer}
@@ -534,7 +536,7 @@ export default function CareerForm({ career, formType, setShowEditModal }: { car
                 </div>
         </div>) : (
             <div style={{ marginBottom: "35px", display: "flex", flexDirection: "row", justifyContent: "space-between", alignItems: "center", width: "100%" }}>
-            <h1 style={{ fontSize: "24px", fontWeight: 550, color: "#111827" }}>Edit Career Details</h1>
+            <h1 style={{ fontSize: "24px", fontWeight: 550, color: "#111827" }}>{step > 1 ? `[Draft] ${jobTitle?.trim() || "Untitled Role"}` : "Edit Career Details"}</h1>
             <div style={{ display: "flex", flexDirection: "row", alignItems: "center", gap: "10px" }}>
                 <button
                     style={{
@@ -598,8 +600,6 @@ export default function CareerForm({ career, formType, setShowEditModal }: { car
            step={step}
            totalSteps={totalSteps}
            currentStepPartial={(() => {
-             // Show half progress only while on a step AND required fields for that step are satisfied
-             // but user hasn't moved forward yet. For now we implement for Step 1 (can be extended later).
              if (step === 1) {
                const hasJobTitle = jobTitle?.trim().length > 0;
                const hasDescription = description?.trim().length > 0;
@@ -609,9 +609,9 @@ export default function CareerForm({ career, formType, setShowEditModal }: { car
                const hasCity = city?.trim().length > 0;
                return hasJobTitle && hasDescription && hasEmploymentType && hasWorkSetup && hasProvince && hasCity;
              }
-             // Placeholder for future steps if partial states are needed.
              return false;
            })()}
+           forceStep2Half={step === 2} /* show half connector toward step 3 only when exactly on step 2 */
          />
           {/* Separator */}
 					<div className="max-w-full mx-auto" style={{ height: 1, background: '#E9EAEB', width: '85%', marginBottom: 20 }} />
@@ -654,6 +654,15 @@ export default function CareerForm({ career, formType, setShowEditModal }: { car
                     showAddMemberDropdown={showAddMemberDropdown}
                     setShowAddMemberDropdown={setShowAddMemberDropdown}
                   />     
+          )}
+          {step === 2 && (
+            // Step 2 (CV Review & Pre-Screening)
+            <Step2CVReview
+              screeningSetting={screeningSetting}
+              onChangeScreeningSetting={(val) => setScreeningSetting(val)}
+              preScreeningQuestions={preScreeningQuestions}
+              setPreScreeningQuestions={setPreScreeningQuestions}
+            />
           )}
       
       {showSaveModal && (
