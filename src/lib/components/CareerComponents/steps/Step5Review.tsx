@@ -23,6 +23,8 @@ interface Step5ReviewProps {
   salaryNegotiable: boolean;
   screeningSetting: string;
   secretPrompt?: string;
+  aiSecretPrompt?: string;
+  requireVideo?: boolean;
   teamMembers: any[];
   preScreeningQuestions: PreScreeningQuestion[];
   interviewCategories?: Category[];
@@ -35,7 +37,7 @@ interface Step5ReviewProps {
 export default function Step5Review(props: Step5ReviewProps) {
   const {
     jobTitle, description, employmentType, workSetup, country, province, city,
-  minimumSalary, maximumSalary, salaryNegotiable, screeningSetting, secretPrompt,
+  minimumSalary, maximumSalary, salaryNegotiable, screeningSetting, secretPrompt, aiSecretPrompt, requireVideo,
     teamMembers, preScreeningQuestions, interviewCategories,
     onPublish, onSaveDraft, saving, formType
   } = props;
@@ -168,26 +170,82 @@ export default function Step5Review(props: Step5ReviewProps) {
         </div>
       </CollapsibleCard>
 
-      {/* Section: AI Interview Setup */}
+      {/* Section: AI Interview Setup (redesigned) */}
       <CollapsibleCard title="AI Interview Setup" defaultOpen>
-        <SubCard title="Interview Categories">
-          {(!interviewCategories || interviewCategories.every(c => c.questions.length === 0)) && <Empty value="No interview questions" />}
-          {interviewCategories?.map((cat) => (
-            <div key={cat.label} style={{ marginBottom: 10 }}>
-              <div style={{ fontSize: 13, fontWeight: 600, color: '#181D27', marginBottom: 4 }}>{cat.label}</div>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-                {cat.questions.slice(0, 5).map((q, i) => (
-                  <div key={i} style={{ fontSize: 13, color: '#414651', lineHeight: 1.4 }}>
-                    • {q.text || '—'}
-                  </div>
-                ))}
-                {cat.questions.length > 5 && (
-                  <div style={{ fontSize: 12, color: '#667085' }}>+ {cat.questions.length - 5} more</div>
-                )}
-              </div>
+        <div style={{ background: '#FFFFFF', border: '1px solid #EAECF0', borderRadius: 16, padding: 20 }}>
+          {/* AI Interview Screening */}
+          <div style={{ marginBottom: 16 }}>
+            <h4 style={{ fontSize: 13, fontWeight: 600, color: '#181D27', margin: 0, marginBottom: 6 }}>AI Interview Screening</h4>
+            <div style={{ fontSize: 13, color: '#181D27' }}>Automatically endorse candidates who are {renderScreeningSettingPill(screeningSetting)} and above</div>
+          </div>
+          <div style={{ height: 1, background: '#E5E7EB', margin: '12px 0' }} />
+
+          {/* Require Video Row */}
+          <div style={{ marginBottom: 16 }}>
+            <h4 style={{ fontSize: 13, fontWeight: 600, color: '#181D27', margin: 0, marginBottom: 6 }}>Require Video on Interview</h4>
+            <div style={{ fontSize: 13, color: '#414651', display: 'flex', alignItems: 'center', gap: 8 }}>
+              <i className="la la-video" style={{ fontSize: 16, color: '#667085' }} aria-hidden="true"></i>
+              {requireVideo ? 'Yes' : 'No'}
             </div>
-          ))}
-        </SubCard>
+          </div>
+          <div style={{ height: 1, background: '#E5E7EB', margin: '12px 0' }} />
+
+          {/* AI Secret Prompt */}
+          <div style={{ marginBottom: 16 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 8 }}>
+              <span>
+                <img src="/career_form_svg/star.svg" width={16} height={16} alt="sparkle" aria-hidden="true" />
+              </span>
+              <h4 style={{ fontSize: 13, fontWeight: 600, color: '#181D27', margin: 0 }}>AI Interview Secret Prompt</h4>
+            </div>
+            {aiSecretPrompt ? (
+              <ul style={{ margin: 0, paddingLeft: 18, display: 'flex', flexDirection: 'column', gap: 4 }}>
+                {splitPrompt(aiSecretPrompt).map((line, idx) => (
+                  <li key={idx} style={{ fontSize: 13, color: '#414651', lineHeight: 1.4 }}>{line}</li>
+                ))}
+              </ul>
+            ) : (
+              <div style={{ fontSize: 13, color: '#667085', fontStyle: 'italic' }}>No secret prompt provided.</div>
+            )}
+          </div>
+          <div style={{ height: 1, background: '#E5E7EB', margin: '12px 0' }} />
+
+          {/* Interview Questions */}
+          <div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
+              <h4 style={{ fontSize: 13, fontWeight: 600, color: '#181D27', margin: 0 }}>Interview Questions</h4>
+              <span style={{ fontSize: 11, lineHeight: '16px', padding: '1px 6px', borderRadius: 999, border: '1px solid #D5D7DA', background: '#FFFFFF', color: '#181D27', fontWeight: 500 }}>
+                {interviewCategories ? interviewCategories.reduce((sum, c) => sum + c.questions.length, 0) : 0}
+              </span>
+            </div>
+            {(!interviewCategories || interviewCategories.every(c => c.questions.length === 0)) ? (
+              <div style={{ fontSize: 13, color: '#667085', fontStyle: 'italic' }}>None</div>
+            ) : (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+                {(() => {
+                  const items: React.ReactNode[] = [];
+                  let counter = 1;
+                  interviewCategories!.forEach(cat => {
+                    if (cat.questions.length === 0) return;
+                    items.push(
+                      <div key={`heading-${cat.label}`} style={{ fontSize: 12, fontWeight: 600, color: '#667085', textTransform: 'uppercase', letterSpacing: 0.5 }}>{cat.label}</div>
+                    );
+                    cat.questions.forEach(q => {
+                      items.push(
+                        <div key={`q-${cat.label}-${counter}`} style={{ fontSize: 13, color: '#414651', lineHeight: 1.4, display: 'flex', alignItems: 'flex-start', gap: 6 }}>
+                          <span style={{ color: '#181D27', fontWeight: 600 }}>{counter}.</span>
+                          <span style={{ flex: 1 }}>{q.text || '—'}</span>
+                        </div>
+                      );
+                      counter++;
+                    });
+                  });
+                  return items;
+                })()}
+              </div>
+            )}
+          </div>
+        </div>
       </CollapsibleCard>
 
       {/* Footer actions */}
