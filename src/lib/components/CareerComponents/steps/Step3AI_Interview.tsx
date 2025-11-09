@@ -63,14 +63,27 @@ const Step3AI_Interview = forwardRef<Step3InterviewRef, Step3Props>(
 		];
 		const [categories, setCategories] = useState<Category[]>(() => initialCategories && initialCategories.length > 0 ? initialCategories : defaultCategories);
 
-	const totalQuestions = useMemo(
-		() => categories.reduce((sum, c) => sum + c.questions.length, 0),
-		[categories]
-	);
+		// Total questions regardless of saved state (used for badge count)
+		const totalQuestions = useMemo(
+			() => categories.reduce((sum, c) => sum + c.questions.length, 0),
+			[categories]
+		);
+
+		// Count only valid, saved questions: non-empty text and not in editing mode
+		const savedValidCount = useMemo(
+			() =>
+				categories.reduce(
+					(sum, c) =>
+						sum + c.questions.filter((q) => q.editing === false && q.text && q.text.trim().length > 0).length,
+					0
+				),
+			[categories]
+		);
 
 	useImperativeHandle(ref, () => ({
-		validateQuestions: () => {
-			const ok = totalQuestions >= MIN_TOTAL_QUESTIONS;
+			validateQuestions: () => {
+				// Require at least MIN_TOTAL_QUESTIONS that are saved (editing=false) and non-empty
+				const ok = savedValidCount >= MIN_TOTAL_QUESTIONS;
 			setShowMinError(!ok);
 			return ok;
 		},
