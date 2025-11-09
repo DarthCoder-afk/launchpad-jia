@@ -248,6 +248,18 @@ export default function Step5Review(props: Step5ReviewProps) {
         </div>
       </CollapsibleCard>
 
+      {/* Section: Pipeline Stages (Step 4 static summary) */}
+      <CollapsibleCard title="Pipeline Stages" defaultOpen>
+        <div style={{ background: '#FFFFFF', border: '1px solid #EAECF0', borderRadius: 16, padding: 16 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(210px,1fr))', gap: 16 }}>
+            {renderPipelineStage('CV Screening', 'la la-user', ['Waiting Submission', 'For Review'])}
+            {renderPipelineStage('AI Interview', 'la la-microphone', ['Waiting Interview', 'For Review'])}
+            {renderPipelineStage('Personality Test', 'la la-brain', ['Waiting Submission', 'For Review'])}
+            {renderPipelineStage('Coding Test', 'la la-code', ['Waiting Submission', 'For Review'])}
+          </div>
+        </div>
+      </CollapsibleCard>
+
       {/* Footer actions */}
       <div style={{ display: 'flex', gap: 12, marginTop: 8 }}>
         <button
@@ -482,4 +494,30 @@ function renderQuestionDetails(q: any) {
   }
   // short/long answer have no predefined options
   return null;
+}
+
+// Static pipeline stage renderer for Step 4 review card
+function renderPipelineStage(title: string, iconClass: string, subStages: string[]) {
+  return (
+    <div style={{ border: '1px solid #E9EAEB', background: '#F9FAFB', borderRadius: 12, padding: 16, display: 'flex', flexDirection: 'column', gap: 10 }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+        <i className={iconClass} style={{ fontSize: 16, color: '#667085' }} aria-hidden="true"></i>
+        <div style={{ fontSize: 14, fontWeight: 600, color: '#181D27' }}>{title}</div>
+      </div>
+      <div style={{ fontSize: 11, fontWeight: 500, color: '#667085', letterSpacing: 0.5, textTransform: 'uppercase' }}>Substages</div>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+        {subStages.map((s) => (
+          <div key={s} style={{
+            border: '1px solid #E9EAEB',
+            background: '#FFFFFF',
+            borderRadius: 8,
+            padding: '10px 12px',
+            fontSize: 13,
+            color: '#181D27',
+            fontWeight: 500
+          }}>{s}</div>
+        ))}
+      </div>
+    </div>
+  );
 }
