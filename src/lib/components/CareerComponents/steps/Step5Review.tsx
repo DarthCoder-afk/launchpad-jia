@@ -49,9 +49,9 @@ export default function Step5Review(props: Step5ReviewProps) {
 
       {/* Section: Career Details & Team Access */}
       <CollapsibleCard title="Career Details & Team Access" defaultOpen>
-        <div style={{ background: '#FFFFFF', border: '1px solid #EAECF0', borderRadius: 16, overflow: 'hidden' }}>
+        <div style={{ background: '#FFFFFF', borderRadius: 16, overflow: 'hidden' }}>
           {/* Row: Job Title (full width) */}
-          <div style={{ padding: '14px 16px', borderBottom: '1px solid #EAECF0' }}>
+          <div style={{ padding: '14px 16px', borderBottom: '1px solid #EAECF0'}}>
             <Field label="Job Title" value={jobTitle || '—'} />
           </div>
 
@@ -88,163 +88,213 @@ export default function Step5Review(props: Step5ReviewProps) {
             </div>
           </div>
 
-          {/* Row: Job Description (block) */}
+          {/* Row: Job Description (Field) */}
           <div style={{ padding: '14px 16px', borderBottom: teamMembers.length ? '1px solid #EAECF0' : 'none' }}>
-            <div style={{ fontSize: 12, color: '#667085', marginBottom: 6 }}>Job Description</div>
-            <div style={{ fontSize: 13, color: '#111827', lineHeight: 1.6, whiteSpace: 'pre-wrap' }}>{normalizeDescription(description || '') || '—'}</div>
+            <Field
+              label="Job Description"
+              value={
+                <div style={{ fontSize: 14, color: '#111827', lineHeight: 1.6, whiteSpace: 'pre-wrap' }}>
+                  {normalizeDescription(description || '') || '—'}
+                </div>
+              }
+            />
           </div>
 
-          {/* Row: Team Access list */}
+          {/* Row: Team Access list (Field) */}
           <div style={{ padding: '14px 16px' }}>
-            <div style={{ fontSize: 12, color: '#667085', marginBottom: 10 }}>Team Access</div>
-            {teamMembers.length === 0 && <Empty value="No team members added" />}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-              {teamMembers.map((m) => (
-                <div key={m.email}
-                     style={{ display: 'grid', gridTemplateColumns: 'auto 1fr auto', alignItems: 'center', gap: 12 }}>
-                  <Avatar name={m.name} image={m.image} />
-                  <div>
-                    <div style={{ fontSize: 13, fontWeight: 600, color: '#111827' }}>{m.name}</div>
-                    {m.email && <div style={{ fontSize: 12, color: '#667085' }}>{m.email}</div>}
+            <Field
+              label="Team Access"
+              value={
+                teamMembers.length === 0 ? (
+                  <Empty value="No team members added" />
+                ) : (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                    {teamMembers.map((m) => (
+                      <div
+                        key={m.email}
+                        style={{ display: 'grid', gridTemplateColumns: 'auto 1fr auto', alignItems: 'center', gap: 12 }}
+                      >
+                        <Avatar name={m.name} image={m.image} />
+                        <div>
+                          <div style={{ fontSize: 13, fontWeight: 600, color: '#111827' }}>{m.name}</div>
+                          {m.email && <div style={{ fontSize: 12, color: '#667085' }}>{m.email}</div>}
+                        </div>
+                        <div style={{ fontSize: 12, color: '#98A2B3' }}>{m.role || 'Member'}</div>
+                      </div>
+                    ))}
                   </div>
-                  <div style={{ fontSize: 12, color: '#98A2B3' }}>{m.role || 'Member'}</div>
-                </div>
-              ))}
-            </div>
+                )
+              }
+            />
           </div>
         </div>
       </CollapsibleCard>
 
       {/* Section: CV Review & Pre-Screening Questions */}
       <CollapsibleCard title="CV Review & Pre-Screening Questions" defaultOpen>
-        <div style={{ background: '#FFFFFF', border: '1px solid #EAECF0', borderRadius: 16, padding: 20 }}>
-          {/* CV Screening summary */}
-          <div style={{ marginBottom: 16 }}>
-            <h4 style={{ fontSize: 13, fontWeight: 600, color: '#181D27', margin: 0, marginBottom: 6 }}>CV Screening</h4>
-            <div style={{ fontSize: 13, color: '#181D27' }}>
-              Automatically endorse candidates who are{' '}
-              {renderScreeningSettingPill(screeningSetting)}{' '}and above
-            </div>
-          </div>
-          <div style={{ height: 1, background: '#E5E7EB', margin: '12px 0' }} />
-
-          {/* CV Secret Prompt */}
-            <div style={{ marginBottom: 16 }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 8 }}>
-                <span>
-                  <img src="/career_form_svg/star.svg" width={16} height={16} alt="sparkle" aria-hidden="true" />
+        <div style={{ background: '#FFFFFF', borderRadius: 16, padding: 20 }}>
+          {/* Row: CV Screening (Field) */}
+          <div style={{ marginBottom: 12 }}>
+            <Field
+              label="CV Screening"
+              value={
+                <span style={{  color: '#181D27' }}>
+                  Automatically endorse candidates who are {renderScreeningSettingPill(screeningSetting)} and above
                 </span>
-                <h4 style={{ fontSize: 13, fontWeight: 600, color: '#181D27', margin: 0 }}>CV Secret Prompt</h4>
-              </div>
-              {secretPrompt ? (
-                <ul style={{ margin: 0, paddingLeft: 18, display: 'flex', flexDirection: 'column', gap: 4 }}>
-                  {splitPrompt(secretPrompt).map((line, idx) => (
-                    <li key={idx} style={{ fontSize: 13, color: '#414651', lineHeight: 1.4 }}>{line}</li>
-                  ))}
-                </ul>
-              ) : (
-                <div style={{ fontSize: 13, color: '#667085', fontStyle: 'italic' }}>No secret prompt provided.</div>
-              )}
-            </div>
+              }
+            />
+          </div>
           <div style={{ height: 1, background: '#E5E7EB', margin: '12px 0' }} />
 
-          {/* Pre-Screening Questions */}
-          <div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
-              <h4 style={{ fontSize: 13, fontWeight: 600, color: '#181D27', margin: 0 }}>Pre-Screening Questions</h4>
-              <span style={{ fontSize: 11, lineHeight: '16px', padding: '1px 6px', borderRadius: 999, border: '1px solid #D5D7DA', background: '#FFFFFF', color: '#181D27', fontWeight: 500 }}>{preScreeningQuestions.length}</span>
-            </div>
-            {preScreeningQuestions.length === 0 ? (
-              <div style={{ fontSize: 13, color: '#667085', fontStyle: 'italic' }}>None</div>
-            ) : (
-              <ol style={{ margin: 0, paddingLeft: 20, display: 'flex', flexDirection: 'column', gap: 14 }}>
-                {preScreeningQuestions.map((q, idx) => (
-                  <li key={String(q.id ?? idx)} style={{ fontSize: 13, color: '#181D27' }}>
-                    <div style={{ marginBottom: 6 }}>{q.title || q.key || 'Untitled question'}</div>
-                    {renderQuestionDetails(q)}
-                  </li>
-                ))}
-              </ol>
-            )}
+          {/* Row: CV Secret Prompt (Field) */}
+          <div style={{ marginBottom: 12 }}>
+            <Field
+              label={
+                <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+                  <img
+                    src="/career_form_svg/star.svg"
+                    width={16}
+                    height={16}
+                    alt="gradient star icon"
+                    aria-hidden="true"
+                  />
+                  <span>CV Secret Prompt</span>
+                </div>
+              }
+              value={
+                secretPrompt ? (
+                  <ul style={{ margin: 0, paddingLeft: 18, display: 'flex', flexDirection: 'column', gap: 4 }}>
+                    {splitPrompt(secretPrompt).map((line, idx) => (
+                      <li key={idx} style={{  color: '#414651', lineHeight: 1.4 }}>{line}</li>
+                    ))}
+                  </ul>
+                ) : (
+                  <span style={{  color: '#667085', fontStyle: 'italic' }}>No secret prompt provided.</span>
+                )
+              }
+            />
           </div>
+          <div style={{ height: 1, background: '#E5E7EB', margin: '12px 0' }} />
+
+          {/* Row: Pre-Screening Questions (Field for count) */}
+            <div style={{ marginBottom: 8, display: 'flex', alignItems: 'center', gap: 8 }}>
+              <div style={{ fontSize: 13, fontWeight: 600, color: '#181D27' }}>Pre-Screening Questions</div>
+              <span
+                aria-label="Pre-screening questions count"
+                style={{ fontSize: 11, lineHeight: '16px', padding: '1px 6px', borderRadius: 999, border: '1px solid #D5D7DA', background: '#FFFFFF', color: '#181D27', fontWeight: 500 }}>
+                {preScreeningQuestions.length}
+              </span>
+            </div>
+          {preScreeningQuestions.length === 0 ? (
+            <div style={{ color: '#667085', fontStyle: 'italic' }}>None</div>
+          ) : (
+            <ol style={{ fontSize: 13, margin: 0, paddingLeft: 20, display: 'flex', flexDirection: 'column', gap: 14 }}>
+              {preScreeningQuestions.map((q, idx) => (
+                <li key={String(q.id ?? idx)} style={{ color: '#181D27' }}>
+                  <div style={{ marginBottom: 6 }}>{q.title || q.key || 'Untitled question'}</div>
+                  {renderQuestionDetails(q)}
+                </li>
+              ))}
+            </ol>
+          )}
         </div>
       </CollapsibleCard>
 
-      {/* Section: AI Interview Setup (redesigned) */}
+      {/* Section: AI Interview Setup (redesigned, using Field) */}
       <CollapsibleCard title="AI Interview Setup" defaultOpen>
-        <div style={{ background: '#FFFFFF', border: '1px solid #EAECF0', borderRadius: 16, padding: 20 }}>
-          {/* AI Interview Screening */}
-          <div style={{ marginBottom: 16 }}>
-            <h4 style={{ fontSize: 13, fontWeight: 600, color: '#181D27', margin: 0, marginBottom: 6 }}>AI Interview Screening</h4>
-            <div style={{ fontSize: 13, color: '#181D27' }}>Automatically endorse candidates who are {renderScreeningSettingPill(screeningSetting)} and above</div>
+        <div style={{ background: '#FFFFFF',  borderRadius: 16, padding: 20 }}>
+          {/* Row: AI Interview Screening (Field) */}
+          <div style={{ marginBottom: 12 }}>
+            <Field
+              label="AI Interview Screening"
+              value={
+                <span style={{  color: '#181D27' }}>
+                  Automatically endorse candidates who are {renderScreeningSettingPill(screeningSetting)} and above
+                </span>
+              }
+            />
           </div>
           <div style={{ height: 1, background: '#E5E7EB', margin: '12px 0' }} />
 
-          {/* Require Video Row */}
-          <div style={{ marginBottom: 16 }}>
-            <h4 style={{ fontSize: 13, fontWeight: 600, color: '#181D27', margin: 0, marginBottom: 6 }}>Require Video on Interview</h4>
-            <div style={{ fontSize: 13, color: '#414651', display: 'flex', alignItems: 'center', gap: 8 }}>
-              <i className="la la-video" style={{ fontSize: 16, color: '#667085' }} aria-hidden="true"></i>
-              {requireVideo ? 'Yes' : 'No'}
-            </div>
+          {/* Row: Require Video (Field) */}
+          <div style={{ marginBottom: 12 }}>
+            <Field
+              label="Require Video on Interview"
+              value={
+                <div style={{ color: '#414651', display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <i className="la la-video" style={{ color: '#667085' }} aria-hidden="true"></i>
+                  {requireVideo ? 'Yes' : 'No'}
+                </div>
+              }
+            />
           </div>
           <div style={{ height: 1, background: '#E5E7EB', margin: '12px 0' }} />
 
-          {/* AI Secret Prompt */}
-          <div style={{ marginBottom: 16 }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 8 }}>
-              <span>
-                <img src="/career_form_svg/star.svg" width={16} height={16} alt="sparkle" aria-hidden="true" />
-              </span>
-              <h4 style={{ fontSize: 13, fontWeight: 600, color: '#181D27', margin: 0 }}>AI Interview Secret Prompt</h4>
-            </div>
-            {aiSecretPrompt ? (
-              <ul style={{ margin: 0, paddingLeft: 18, display: 'flex', flexDirection: 'column', gap: 4 }}>
-                {splitPrompt(aiSecretPrompt).map((line, idx) => (
-                  <li key={idx} style={{ fontSize: 13, color: '#414651', lineHeight: 1.4 }}>{line}</li>
-                ))}
-              </ul>
-            ) : (
-              <div style={{ fontSize: 13, color: '#667085', fontStyle: 'italic' }}>No secret prompt provided.</div>
-            )}
+          {/* Row: AI Secret Prompt (Field) */}
+          <div style={{ marginBottom: 12 }}>
+            <Field
+              label={
+                <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+                  <img
+                    src="/career_form_svg/star.svg"
+                    width={16}
+                    height={16}
+                    alt="gradient star icon"
+                    aria-hidden="true"
+                  />
+                  <span>AI Interview Secret Prompt</span>
+                </div>
+              }
+              value={
+                aiSecretPrompt ? (
+                  <ul style={{ margin: 0, paddingLeft: 18, display: 'flex', flexDirection: 'column', gap: 4 }}>
+                    {splitPrompt(aiSecretPrompt).map((line, idx) => (
+                      <li key={idx} style={{  color: '#414651', lineHeight: 1.4 }}>{line}</li>
+                    ))}
+                  </ul>
+                ) : (
+                  <span style={{ color: '#667085', fontStyle: 'italic' }}>No secret prompt provided.</span>
+                )
+              }
+            />
           </div>
           <div style={{ height: 1, background: '#E5E7EB', margin: '12px 0' }} />
 
-          {/* Interview Questions */}
-          <div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
-              <h4 style={{ fontSize: 13, fontWeight: 600, color: '#181D27', margin: 0 }}>Interview Questions</h4>
-              <span style={{ fontSize: 11, lineHeight: '16px', padding: '1px 6px', borderRadius: 999, border: '1px solid #D5D7DA', background: '#FFFFFF', color: '#181D27', fontWeight: 500 }}>
-                {interviewCategories ? interviewCategories.reduce((sum, c) => sum + c.questions.length, 0) : 0}
-              </span>
-            </div>
-            {(!interviewCategories || interviewCategories.every(c => c.questions.length === 0)) ? (
-              <div style={{ fontSize: 13, color: '#667085', fontStyle: 'italic' }}>None</div>
-            ) : (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-                {(() => {
-                  const items: React.ReactNode[] = [];
-                  let counter = 1;
-                  interviewCategories!.forEach(cat => {
-                    if (cat.questions.length === 0) return;
+          {/* Row: Interview Questions (heading with inline count pill) */}
+          <div style={{ marginBottom: 8, display: 'flex', alignItems: 'center', gap: 8 }}>
+            <div style={{ fontSize: 13, fontWeight: 600, color: '#181D27' }}>Interview Questions</div>
+            <span
+              aria-label="Interview questions count"
+              style={{ fontSize: 11, lineHeight: '16px', padding: '1px 6px', borderRadius: 999, border: '1px solid #D5D7DA', background: '#FFFFFF', color: '#181D27', fontWeight: 500 }}>
+              {interviewCategories ? interviewCategories.reduce((sum, c) => sum + c.questions.length, 0) : 0}
+            </span>
+          </div>
+          {(!interviewCategories || interviewCategories.every(c => c.questions.length === 0)) ? (
+            <div style={{  color: '#667085', fontStyle: 'italic' }}>None</div>
+          ) : (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+              {(() => {
+                const items: React.ReactNode[] = [];
+                let counter = 1;
+                interviewCategories!.forEach(cat => {
+                  if (cat.questions.length === 0) return;
+                  items.push(
+                    <div key={`heading-${cat.label}`} style={{ fontSize: 14, fontWeight: 600, color: '#667085',  letterSpacing: 0.3 }}>{cat.label}</div>
+                  );
+                  cat.questions.forEach(q => {
                     items.push(
-                      <div key={`heading-${cat.label}`} style={{ fontSize: 12, fontWeight: 600, color: '#667085', textTransform: 'uppercase', letterSpacing: 0.5 }}>{cat.label}</div>
+                      <div key={`q-${cat.label}-${counter}`} style={{ fontSize: 13, color: '#414651', lineHeight: 1.4, display: 'flex', alignItems: 'flex-start', gap: 6 }}>
+                        <span style={{ color: '#181D27', fontWeight: 600 }}>{counter}.</span>
+                        <span style={{ flex: 1 }}>{q.text || '—'}</span>
+                      </div>
                     );
-                    cat.questions.forEach(q => {
-                      items.push(
-                        <div key={`q-${cat.label}-${counter}`} style={{ fontSize: 13, color: '#414651', lineHeight: 1.4, display: 'flex', alignItems: 'flex-start', gap: 6 }}>
-                          <span style={{ color: '#181D27', fontWeight: 600 }}>{counter}.</span>
-                          <span style={{ flex: 1 }}>{q.text || '—'}</span>
-                        </div>
-                      );
-                      counter++;
-                    });
+                    counter++;
                   });
-                  return items;
-                })()}
-              </div>
-            )}
-          </div>
+                });
+                return items;
+              })()}
+            </div>
+          )}
         </div>
       </CollapsibleCard>
 
@@ -350,11 +400,11 @@ function Empty({ value }: { value: string }) {
 }
 
 // New simple field and avatar helpers for the details view
-function Field({ label, value }: { label: string; value: React.ReactNode }) {
+function Field({ label, value }: { label: React.ReactNode; value: React.ReactNode }) {
   return (
     <div>
-      <div style={{ fontSize: 12, color: '#667085', marginBottom: 4 }}>{label}</div>
-      <div style={{ fontSize: 13, color: '#111827' }}>{value}</div>
+      <div style={{ fontSize: 14, color: '#667085', marginBottom: 4 }}>{label}</div>
+      <div style={{ fontSize: 15, color: '#111827' }}>{value}</div>
     </div>
   );
 }
