@@ -10,6 +10,7 @@ import FullScreenLoadingAnimation from "./FullScreenLoadingAnimation";
 import ProgressHeader from "./ProgressHeader";
 import Step1CareerDetails from "./steps/Step1CareerDetails";
 import Step2CVReview from "./steps/Step2CVReview";
+import Step3AI_Interview, { type Step3InterviewRef } from "./steps/Step3AI_Interview";
   // (Removed local option lists and unused UI imports to keep this component lean)
 
 export default function CareerForm({ career, formType, setShowEditModal }: { career?: any, formType: string, setShowEditModal?: (show: boolean) => void }) {
@@ -76,7 +77,8 @@ export default function CareerForm({ career, formType, setShowEditModal }: { car
     const [teamMembers, setTeamMembers] = useState<any[]>([]);
     const [showAddMemberDropdown, setShowAddMemberDropdown] = useState(false);
     const [availableMembers, setAvailableMembers] = useState<any[]>([]);
-    const addMemberDropdownRef = useRef<HTMLDivElement>(null);
+  const addMemberDropdownRef = useRef<HTMLDivElement>(null);
+  const step3Ref = useRef<Step3InterviewRef>(null);
 
 
   const isFormValid = () => {
@@ -89,6 +91,11 @@ export default function CareerForm({ career, formType, setShowEditModal }: { car
       const hasProvince = province && province !== "Choose Province";
       const hasCity = city?.trim().length > 0;
       return hasJobTitle && hasDescription && hasEmploymentType && hasWorkSetup && hasProvince && hasCity;
+    }
+
+    // Relax validation for Step 2 so the user can proceed to Step 3 while UI is being built
+    if (step === 2) {
+      return true;
     }
 
     // For later steps, fall back to original strict validation (including questions)
@@ -227,6 +234,13 @@ export default function CareerForm({ career, formType, setShowEditModal }: { car
     }
 
     const handleSaveAndContinue = async () => {
+    // Step 3: enforce minimum interview questions before proceeding
+    if (step === 3) {
+      const ok = step3Ref.current?.validateQuestions() ?? true;
+      if (!ok) {
+        return;
+      }
+    }
     if (!isFormValid()) {
       setShowValidation(true); // trigger red borders + validation messages
       const invalidFields = document.querySelectorAll('.form-control');
@@ -626,6 +640,10 @@ export default function CareerForm({ career, formType, setShowEditModal }: { car
               preScreeningQuestions={preScreeningQuestions}
               setPreScreeningQuestions={setPreScreeningQuestions}
             />
+          )}
+
+          {step === 3 &&(
+            <Step3AI_Interview ref={step3Ref} />
           )}
       
       {showSaveModal && (
