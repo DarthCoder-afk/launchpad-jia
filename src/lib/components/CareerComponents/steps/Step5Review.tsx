@@ -22,6 +22,7 @@ interface Step5ReviewProps {
   maximumSalary: string | number;
   salaryNegotiable: boolean;
   screeningSetting: string;
+  secretPrompt?: string;
   teamMembers: any[];
   preScreeningQuestions: PreScreeningQuestion[];
   interviewCategories?: Category[];
@@ -34,7 +35,7 @@ interface Step5ReviewProps {
 export default function Step5Review(props: Step5ReviewProps) {
   const {
     jobTitle, description, employmentType, workSetup, country, province, city,
-    minimumSalary, maximumSalary, salaryNegotiable, screeningSetting,
+  minimumSalary, maximumSalary, salaryNegotiable, screeningSetting, secretPrompt,
     teamMembers, preScreeningQuestions, interviewCategories,
     onPublish, onSaveDraft, saving, formType
   } = props;
@@ -112,21 +113,58 @@ export default function Step5Review(props: Step5ReviewProps) {
         </div>
       </CollapsibleCard>
 
-      {/* Section: CV Review & Pre-screening */}
-      <CollapsibleCard title="CV Review & Pre-screening" defaultOpen>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: 8 }}>
-          <SubCard title="Pre-Screening Questions">
-            {preScreeningQuestions.length === 0 && <Empty value="None" />}
-            {preScreeningQuestions.map((q, i) => {
-              // Safe extraction: prefer explicit title, fallback to key, else show id
-              const display = typeof q === 'string' ? q : (q.title || q.key || q.id || 'Untitled');
-              return (
-                <div key={typeof q === 'object' ? String(q.id ?? i) : String(i)} style={{ fontSize: 13, color: '#181D27', marginBottom: 6 }}>
-                  {display}
-                </div>
-              );
-            })}
-          </SubCard>
+      {/* Section: CV Review & Pre-Screening Questions */}
+      <CollapsibleCard title="CV Review & Pre-Screening Questions" defaultOpen>
+        <div style={{ background: '#FFFFFF', border: '1px solid #EAECF0', borderRadius: 16, padding: 20 }}>
+          {/* CV Screening summary */}
+          <div style={{ marginBottom: 16 }}>
+            <h4 style={{ fontSize: 13, fontWeight: 600, color: '#181D27', margin: 0, marginBottom: 6 }}>CV Screening</h4>
+            <div style={{ fontSize: 13, color: '#181D27' }}>
+              Automatically endorse candidates who are{' '}
+              {renderScreeningSettingPill(screeningSetting)}{' '}and above
+            </div>
+          </div>
+          <div style={{ height: 1, background: '#E5E7EB', margin: '12px 0' }} />
+
+          {/* CV Secret Prompt */}
+            <div style={{ marginBottom: 16 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 8 }}>
+                <span>
+                  <img src="/career_form_svg/star.svg" width={16} height={16} alt="sparkle" aria-hidden="true" />
+                </span>
+                <h4 style={{ fontSize: 13, fontWeight: 600, color: '#181D27', margin: 0 }}>CV Secret Prompt</h4>
+              </div>
+              {secretPrompt ? (
+                <ul style={{ margin: 0, paddingLeft: 18, display: 'flex', flexDirection: 'column', gap: 4 }}>
+                  {splitPrompt(secretPrompt).map((line, idx) => (
+                    <li key={idx} style={{ fontSize: 13, color: '#414651', lineHeight: 1.4 }}>{line}</li>
+                  ))}
+                </ul>
+              ) : (
+                <div style={{ fontSize: 13, color: '#667085', fontStyle: 'italic' }}>No secret prompt provided.</div>
+              )}
+            </div>
+          <div style={{ height: 1, background: '#E5E7EB', margin: '12px 0' }} />
+
+          {/* Pre-Screening Questions */}
+          <div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
+              <h4 style={{ fontSize: 13, fontWeight: 600, color: '#181D27', margin: 0 }}>Pre-Screening Questions</h4>
+              <span style={{ fontSize: 11, lineHeight: '16px', padding: '1px 6px', borderRadius: 999, border: '1px solid #D5D7DA', background: '#FFFFFF', color: '#181D27', fontWeight: 500 }}>{preScreeningQuestions.length}</span>
+            </div>
+            {preScreeningQuestions.length === 0 ? (
+              <div style={{ fontSize: 13, color: '#667085', fontStyle: 'italic' }}>None</div>
+            ) : (
+              <ol style={{ margin: 0, paddingLeft: 20, display: 'flex', flexDirection: 'column', gap: 14 }}>
+                {preScreeningQuestions.map((q, idx) => (
+                  <li key={String(q.id ?? idx)} style={{ fontSize: 13, color: '#181D27' }}>
+                    <div style={{ marginBottom: 6 }}>{q.title || q.key || 'Untitled question'}</div>
+                    {renderQuestionDetails(q)}
+                  </li>
+                ))}
+              </ol>
+            )}
+          </div>
         </div>
       </CollapsibleCard>
 
@@ -325,4 +363,65 @@ function normalizeDescription(input: string): string {
   } catch {
     return input;
   }
+}
+
+// Helpers for CV Review & Pre-screening render
+function renderScreeningSettingPill(setting?: string) {
+  return (
+    <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+      <span style={{
+        display: 'inline-block',
+        padding: '1px 8px',
+        border: '1px solid #D5D7DA',
+        borderRadius: 999,
+        background: '#FFFFFF',
+        color: '#181D27',
+        fontSize: 12,
+        lineHeight: '18px',
+        fontWeight: 500,
+      }}>{setting || 'Good Fit'}</span>
+    </span>
+  );
+}
+
+function splitPrompt(prompt: string): string[] {
+  // Split into non-empty trimmed lines; convert sentences or bullets into items
+  const lines = prompt
+    .replace(/\r/g, '')
+    .split(/\n|\u2022|•/)
+    .map((s) => s.replace(/^\s*[-*•]\s*/, '').trim())
+    .filter(Boolean);
+  // If it's a single long paragraph, try to split by sentences
+  if (lines.length <= 1) {
+    return prompt
+      .split(/(?<=[.!?])\s+(?=[A-Z0-9])/)
+      .map((s) => s.trim())
+      .filter(Boolean);
+  }
+  return lines;
+}
+
+function renderQuestionDetails(q: any) {
+  if (q.type === 'dropdown' || q.type === 'checkboxes') {
+    const opts = (q.options || []) as Array<{ id: string; label: string }>;
+    if (!opts.length) return null;
+    return (
+      <ul style={{ margin: 0, paddingLeft: 18, display: 'flex', flexDirection: 'column', gap: 2 }}>
+        {opts.map((opt) => (
+          <li key={opt.id} style={{ fontSize: 13, color: '#414651' }}>{opt.label}</li>
+        ))}
+      </ul>
+    );
+  }
+  if (q.type === 'range') {
+    const min = q.min ?? '';
+    const max = q.max ?? '';
+    const cur = q.currency ?? '';
+    const label = [cur, min && String(min), (min || max) && max ? ' - ' : '', cur && !min && max ? cur + ' ' : '', max && String(max)]
+      .filter(Boolean)
+      .join('');
+    return <div style={{ fontSize: 13, color: '#414651' }}>{label || '—'}</div>;
+  }
+  // short/long answer have no predefined options
+  return null;
 }
