@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import philippineCitiesAndProvinces from "../../../../public/philippines-locations.json";
 import { candidateActionToast, errorToast } from "@/lib/Utils";
 import { useAppContext } from "@/lib/context/AppContext";
@@ -10,7 +10,11 @@ import FullScreenLoadingAnimation from "./FullScreenLoadingAnimation";
 import ProgressHeader from "./ProgressHeader";
 import Step1CareerDetails from "./steps/Step1CareerDetails";
 import Step2CVReview from "./steps/Step2CVReview";
-import Step3AI_Interview, { type Step3InterviewRef } from "./steps/Step3AI_Interview";
+import Step3AI_Interview, { type Step3InterviewRef, type Category as Step3Category } from "./steps/Step3AI_Interview";
+import Step4Pipeline from "./steps/Step4Pipeline";
+import Step5Review from "./steps/Step5Review";
+import { useAutoSaveDraft } from "@/lib/hooks/useAutoSaveDraft";
+import { loadDraft } from "@/lib/utils/draftStorage";
   // (Removed local option lists and unused UI imports to keep this component lean)
 
 export default function CareerForm({ career, formType, setShowEditModal }: { career?: any, formType: string, setShowEditModal?: (show: boolean) => void }) {
@@ -25,38 +29,8 @@ export default function CareerForm({ career, formType, setShowEditModal }: { car
     const [salaryNegotiable, setSalaryNegotiable] = useState(career?.salaryNegotiable || true);
     const [minimumSalary, setMinimumSalary] = useState(career?.minimumSalary || "");
     const [maximumSalary, setMaximumSalary] = useState(career?.maximumSalary || "");
-    const [questions, setQuestions] = useState(career?.questions || [
-      {
-        id: 1,
-        category: "CV Validation / Experience",
-        questionCountToAsk: null,
-        questions: [],
-      },
-      {
-        id: 2,
-        category: "Technical",
-        questionCountToAsk: null,
-        questions: [],
-      },
-      {
-        id: 3,
-        category: "Behavioral",
-        questionCountToAsk: null,
-        questions: [],
-      },
-      {
-        id: 4,
-        category: "Analytical",
-        questionCountToAsk: null,
-        questions: [],
-      },
-      {
-        id: 5,
-        category: "Others",
-        questionCountToAsk: null,
-        questions: [],
-      },
-    ]);
+    // Legacy questions array kept for backwards compatibility in save/update payloads
+    const [questions, setQuestions] = useState(career?.questions || []);
     const [country, setCountry] = useState(career?.country || "Philippines");
     const [province, setProvince] = useState(career?.province ||"Choose Province");
     const [city, setCity] = useState(career?.location || "");
@@ -64,13 +38,18 @@ export default function CareerForm({ career, formType, setShowEditModal }: { car
     const [cityList, setCityList] = useState([]);
   // Step 2: Pre-screening questions (local only for now)
   const [preScreeningQuestions, setPreScreeningQuestions] = useState<any[]>([]);
+  const [secretPrompt, setSecretPrompt] = useState<string>("");
+  // Step 3: AI Interview Secret Prompt
+  const [aiSecretPrompt, setAiSecretPrompt] = useState<string>("");
     const [showSaveModal, setShowSaveModal] = useState("");
     const [isSavingCareer, setIsSavingCareer] = useState(false);
     const savingCareerRef = useRef(false);
-    const [step, setStep] = useState(1);
+  const [step, setStep] = useState(1);
+  // Step 3 local categories persisted as part of draft
+  const [step3Categories, setStep3Categories] = useState<Step3Category[] | undefined>(undefined);
     const totalSteps = 5;
 
-    const handleNext = () => setStep(prev => Math.min(prev + 1, totalSteps));
+  const handleNext = () => setStep(prev => Math.min(prev + 1, totalSteps));
     const handlePrev = () => setStep(prev => Math.max(prev - 1, 1));
 
     const [showValidation, setShowValidation] = useState(false);
@@ -79,6 +58,86 @@ export default function CareerForm({ career, formType, setShowEditModal }: { car
     const [availableMembers, setAvailableMembers] = useState<any[]>([]);
   const addMemberDropdownRef = useRef<HTMLDivElement>(null);
   const step3Ref = useRef<Step3InterviewRef>(null);
+
+  // Identify draft storage key (new vs edit)
+  const draftKey = useMemo(() => {
+    return career?._id ? `careerDraft:${career._id}` : `careerDraft:new`;
+  }, [career?._id]);
+
+  type CareerDraft = {
+    step: number;
+    jobTitle: string;
+    description: string;
+    employmentType: string;
+    workSetup: string;
+    workSetupRemarks: string;
+    screeningSetting: string;
+    requireVideo: boolean;
+    salaryNegotiable: boolean;
+    minimumSalary: string | number;
+    maximumSalary: string | number;
+    country: string;
+    province: string;
+    city: string;
+    teamMembers: any[];
+    preScreeningQuestions: any[];
+    secretPrompt?: string;
+    aiSecretPrompt?: string;
+    step3Categories?: Step3Category[];
+  };
+
+  // Compose draft object from current state
+  const draft: CareerDraft = useMemo(() => ({
+    step,
+    jobTitle,
+    description,
+    employmentType,
+    workSetup,
+    workSetupRemarks,
+    screeningSetting,
+    requireVideo,
+    salaryNegotiable,
+    minimumSalary,
+    maximumSalary,
+    country,
+    province,
+    city,
+    teamMembers,
+    preScreeningQuestions,
+    secretPrompt,
+    aiSecretPrompt,
+    step3Categories,
+  }), [step, jobTitle, description, employmentType, workSetup, workSetupRemarks, screeningSetting, requireVideo, salaryNegotiable, minimumSalary, maximumSalary, country, province, city, teamMembers, preScreeningQuestions, secretPrompt, aiSecretPrompt, step3Categories]);
+
+  // Auto-save draft locally with debounce, and hydrate on first mount
+  const { status: draftStatus } = useAutoSaveDraft<CareerDraft>({
+    key: draftKey,
+    data: draft,
+    delay: 700,
+    enabled: true,
+    onHydrate: (d) => {
+      // Apply hydrated values into local state
+      setStep(d.step || 1);
+      setJobTitle(d.jobTitle ?? "");
+      setDescription(d.description ?? "");
+      setEmploymentType(d.employmentType ?? "");
+      setWorkSetup(d.workSetup ?? "");
+      setWorkSetupRemarks(d.workSetupRemarks ?? "");
+      setScreeningSetting(d.screeningSetting ?? "Good Fit and above");
+      setTeamMembers(Array.isArray(d.teamMembers) ? d.teamMembers : []);
+      setPreScreeningQuestions(Array.isArray(d.preScreeningQuestions) ? d.preScreeningQuestions : []);
+  setSecretPrompt(d.secretPrompt ?? "");
+    setAiSecretPrompt(d.aiSecretPrompt ?? "");
+      setRequireVideo(typeof d.requireVideo === 'boolean' ? d.requireVideo : true);
+      setSalaryNegotiable(typeof d.salaryNegotiable === 'boolean' ? d.salaryNegotiable : true);
+      setMinimumSalary((d.minimumSalary as any) ?? "");
+      setMaximumSalary((d.maximumSalary as any) ?? "");
+      setCountry(d.country ?? "Philippines");
+      setProvince(d.province ?? "Choose Province");
+      setCity(d.city ?? "");
+      if (d.step3Categories && d.step3Categories.length) setStep3Categories(d.step3Categories);
+    }
+  });
 
 
   const isFormValid = () => {
@@ -98,11 +157,20 @@ export default function CareerForm({ career, formType, setShowEditModal }: { car
       return true;
     }
 
+    // Step 3 validation handled explicitly in handleSaveAndContinue via the ref (internal Step3 state)
+    if (step === 3) {
+      return true;
+    }
+
+    // Do not block progression from Step 4; final checks happen on publish in Step 5
+    if (step === 4) {
+      return true;
+    }
+
     // For later steps, fall back to original strict validation (including questions)
     return (
       jobTitle?.trim().length > 0 &&
       description?.trim().length > 0 &&
-      questions.some((q) => q.questions.length > 0) &&
       workSetup?.trim().length > 0
     );
   }
@@ -234,9 +302,8 @@ export default function CareerForm({ career, formType, setShowEditModal }: { car
     }
 
     const handleSaveAndContinue = async () => {
-    // Step 3: enforce minimum interview questions before proceeding
     if (step === 3) {
-      const ok = step3Ref.current?.validateQuestions() ?? true;
+      const ok = step3Ref.current?.validateQuestions() ?? false;
       if (!ok) {
         return;
       }
@@ -257,10 +324,7 @@ export default function CareerForm({ career, formType, setShowEditModal }: { car
       return;
     }
 
-        // Save data temporarily as "draft" or "inactive"
-        await saveCareer("draft");
-
-        // Move to next step in the progress header
+        // Advance to next step (review can handle final save logic later)
         handleNext();
       };
 
@@ -465,7 +529,7 @@ export default function CareerForm({ career, formType, setShowEditModal }: { car
         );
     };
 
-    return (
+  return (
         <div className="col">
        
           
@@ -473,6 +537,12 @@ export default function CareerForm({ career, formType, setShowEditModal }: { car
           <div style={{ marginBottom: "35px", display: "flex", flexDirection: "row", justifyContent: "space-between", alignItems: "center", width: "100%" }}>
               <h1 style={{ fontSize: "24px", fontWeight: 550, color: "#111827" }}>{step > 1 ? `[Draft] ${jobTitle?.trim() || "Untitled Role"}` : "Add new career"}</h1>
               <div style={{ display: "flex", flexDirection: "row", alignItems: "center", gap: "10px" }}>
+                 {/* subtle auto-save status */}
+                 {draftStatus !== 'idle' && (
+                   <span style={{ color: '#667085', fontSize: 12 }}>
+                     {draftStatus === 'saving' ? 'Saving…' : draftStatus === 'saved' ? 'Saved' : draftStatus === 'error' ? 'Save failed' : null}
+                   </span>
+                 )}
                  <button
                       disabled={!isFormValid() || isSavingCareer}
                       style={{
@@ -492,7 +562,18 @@ export default function CareerForm({ career, formType, setShowEditModal }: { car
 
                     <button
                       disabled={isSavingCareer}
-                      onClick={handleSaveAndContinue}
+                      onClick={async () => {
+                        if (step === 5) {
+                          // Final publish from Step 5
+                          if (formType === 'add') {
+                            await saveCareer('active');
+                          } else {
+                            await updateCareer('active');
+                          }
+                          return;
+                        }
+                        await handleSaveAndContinue();
+                      }}
                       style={{
                         width: "fit-content",
                         background: isSavingCareer ? "#D5D7DA" : "black",
@@ -508,7 +589,7 @@ export default function CareerForm({ career, formType, setShowEditModal }: { car
                         transition: "background 0.2s ease"
                       }}
                     >
-                      Save and Continue <i className="la la-arrow-right"></i>
+                      {step === 5 ? 'Publish Career' : 'Save and Continue'} {step === 5 ? <i className="la la-check-circle"></i> : <i className="la la-arrow-right"></i>}
                     </button>
                 </div>
         </div>) : (
@@ -548,7 +629,16 @@ export default function CareerForm({ career, formType, setShowEditModal }: { car
                       transition: "background 0.2s ease"
                     }}
                     onClick={async () => {
-                      // For edit flow, still enforce required fields before proceeding
+                      if (step === 5) {
+                        // Final publish in edit flow
+                        if (formType === 'add') {
+                          await saveCareer('active');
+                        } else {
+                          await updateCareer('active');
+                        }
+                        return;
+                      }
+                      // For earlier steps, enforce required fields and advance
                       if (!isFormValid()) {
                         setShowValidation(true);
                         const invalidFields = document.querySelectorAll('.form-control');
@@ -560,13 +650,12 @@ export default function CareerForm({ career, formType, setShowEditModal }: { car
                             inputField.style.border = '';
                           }
                         });
-                        return; // block save until valid
+                        return;
                       }
-                      await updateCareer("draft");
-                      handleNext();
+                      await handleSaveAndContinue();
                     }}
                   >
-                    Save and Continue <i className="la la-arrow-right"></i>
+                    {step === 5 ? (formType === 'add' ? 'Publish Career' : 'Update & Publish') : 'Save and Continue'} {step === 5 ? <i className="la la-check-circle"></i> : <i className="la la-arrow-right"></i>}
                 </button>
               </div>
        </div>
@@ -637,14 +726,68 @@ export default function CareerForm({ career, formType, setShowEditModal }: { car
             <Step2CVReview
               screeningSetting={screeningSetting}
               onChangeScreeningSetting={(val) => setScreeningSetting(val)}
+              secretPrompt={secretPrompt}
+              onChangeSecretPrompt={(val) => setSecretPrompt(val)}
               preScreeningQuestions={preScreeningQuestions}
               setPreScreeningQuestions={setPreScreeningQuestions}
             />
           )}
 
-          {step === 3 &&(
-            <Step3AI_Interview ref={step3Ref} />
+          {step === 3 && (
+            <Step3AI_Interview
+              ref={step3Ref}
+              secretPrompt={aiSecretPrompt}
+              onChangeSecretPrompt={(val) => setAiSecretPrompt(val)}
+              initialCategories={step3Categories}
+              onCategoriesChange={(cats) => setStep3Categories(cats)}
+            />
           )}
+          {step === 4 && (
+            <Step4Pipeline />
+          )}
+          {step === 5 && (
+            <Step5Review
+              jobTitle={jobTitle}
+              description={description}
+              employmentType={employmentType}
+              workSetup={workSetup}
+              country={country}
+              province={province}
+              city={city}
+              minimumSalary={minimumSalary}
+              maximumSalary={maximumSalary}
+              salaryNegotiable={salaryNegotiable}
+              screeningSetting={screeningSetting}
+              secretPrompt={secretPrompt}
+              aiSecretPrompt={aiSecretPrompt}
+              requireVideo={requireVideo}
+              teamMembers={teamMembers}
+              preScreeningQuestions={preScreeningQuestions}
+              interviewCategories={step3Categories}
+              onEditCareerDetails={() => setStep(1)}
+              onEditCVReview={() => setStep(2)}
+              onEditAISetup={() => setStep(3)}
+              onEditPipeline={() => setStep(4)}
+              formType={formType}
+              saving={isSavingCareer}
+              onSaveDraft={async () => {
+                // final server draft save
+                if (formType === 'add') {
+                  await saveCareer('draft');
+                } else {
+                  await updateCareer('draft');
+                }
+              }}
+              onPublish={async () => {
+                if (formType === 'add') {
+                  await saveCareer('active');
+                } else {
+                  await updateCareer('active');
+                }
+              }}
+            />
+          )}
+
       
       {showSaveModal && (
          <CareerActionModal action={showSaveModal} onAction={(action) => saveCareer(action)} />
