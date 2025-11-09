@@ -1,3 +1,4 @@
+// (Using "la" icon font per request)
 "use client";
 import React, { useState } from 'react';
 import type { Category } from './Step3AI_Interview';
@@ -28,6 +29,10 @@ interface Step5ReviewProps {
   teamMembers: any[];
   preScreeningQuestions: PreScreeningQuestion[];
   interviewCategories?: Category[];
+  onEditCareerDetails?: () => void;
+  onEditCVReview?: () => void;
+  onEditAISetup?: () => void;
+  onEditPipeline?: () => void;
   onPublish: () => Promise<void> | void;
   onSaveDraft: () => Promise<void> | void;
   saving: boolean;
@@ -39,6 +44,7 @@ export default function Step5Review(props: Step5ReviewProps) {
     jobTitle, description, employmentType, workSetup, country, province, city,
   minimumSalary, maximumSalary, salaryNegotiable, screeningSetting, secretPrompt, aiSecretPrompt, requireVideo,
     teamMembers, preScreeningQuestions, interviewCategories,
+    onEditCareerDetails, onEditCVReview, onEditAISetup, onEditPipeline,
     onPublish, onSaveDraft, saving, formType
   } = props;
 
@@ -48,7 +54,7 @@ export default function Step5Review(props: Step5ReviewProps) {
       <p style={{ fontSize: 14, color: '#414651', marginTop: -8 }}>Confirm all details before {formType === 'add' ? 'creating' : 'updating'} this career. You can still go back to adjust.</p>
 
       {/* Section: Career Details & Team Access */}
-      <CollapsibleCard title="Career Details & Team Access" defaultOpen>
+  <CollapsibleCard title="Career Details & Team Access" defaultOpen onEdit={onEditCareerDetails} editAriaLabel="Edit career details and team access">
         <div style={{ background: '#FFFFFF', borderRadius: 16, overflow: 'hidden' }}>
           {/* Row: Job Title (full width) */}
           <div style={{ padding: '14px 16px', borderBottom: '1px solid #EAECF0'}}>
@@ -131,7 +137,7 @@ export default function Step5Review(props: Step5ReviewProps) {
       </CollapsibleCard>
 
       {/* Section: CV Review & Pre-Screening Questions */}
-      <CollapsibleCard title="CV Review & Pre-Screening Questions" defaultOpen>
+  <CollapsibleCard title="CV Review & Pre-Screening Questions" defaultOpen onEdit={onEditCVReview} editAriaLabel="Edit CV review and pre-screening">
         <div style={{ background: '#FFFFFF', borderRadius: 16, padding: 20 }}>
           {/* Row: CV Screening (Field) */}
           <div style={{ marginBottom: 12 }}>
@@ -201,7 +207,7 @@ export default function Step5Review(props: Step5ReviewProps) {
       </CollapsibleCard>
 
       {/* Section: AI Interview Setup (redesigned, using Field) */}
-      <CollapsibleCard title="AI Interview Setup" defaultOpen>
+  <CollapsibleCard title="AI Interview Setup" defaultOpen onEdit={onEditAISetup} editAriaLabel="Edit AI interview setup">
         <div style={{ background: '#FFFFFF',  borderRadius: 16, padding: 20 }}>
           {/* Row: AI Interview Screening (Field) */}
           <div style={{ marginBottom: 12 }}>
@@ -299,7 +305,7 @@ export default function Step5Review(props: Step5ReviewProps) {
       </CollapsibleCard>
 
       {/* Section: Pipeline Stages (Step 4 static summary) */}
-      <CollapsibleCard title="Pipeline Stages" defaultOpen>
+  <CollapsibleCard title="Pipeline Stages" defaultOpen onEdit={onEditPipeline} editAriaLabel="Edit pipeline stages">
         <div style={{ background: '#FFFFFF',  borderRadius: 16, padding: 16 }}>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(210px,1fr))', gap: 16 }}>
             {renderPipelineStage('CV Screening', 'la la-user', ['Waiting Submission', 'For Review'])}
@@ -310,60 +316,37 @@ export default function Step5Review(props: Step5ReviewProps) {
         </div>
       </CollapsibleCard>
 
-      {/* Footer actions */}
-      <div style={{ display: 'flex', gap: 12, marginTop: 8 }}>
-        <button
-          type="button"
-          disabled={saving}
-          onClick={() => onSaveDraft()}
-          style={{
-            padding: '10px 16px',
-            borderRadius: 60,
-            border: '1px solid #D5D7DA',
-            background: '#FFFFFF',
-            color: '#181D27',
-            fontSize: 14,
-            cursor: saving ? 'not-allowed' : 'pointer'
-          }}
-        >
-          {saving ? 'Saving…' : 'Save as Draft'}
-        </button>
-        <button
-          type="button"
-          disabled={saving}
-          onClick={() => onPublish()}
-          style={{
-            padding: '10px 16px',
-            borderRadius: 60,
-            border: '1px solid #181D27',
-            background: '#181D27',
-            color: '#FFFFFF',
-            fontSize: 14,
-            cursor: saving ? 'not-allowed' : 'pointer',
-            display: 'inline-flex', alignItems: 'center', gap: 8
-          }}
-        >
-          {saving ? 'Publishing…' : formType === 'add' ? 'Publish Career' : 'Update & Publish'}
-          <i className="la la-check-circle" style={{ fontSize: 16 }}></i>
-        </button>
-      </div>
+     
     </div>
   );
 }
 
-function CollapsibleCard({ title, children, defaultOpen = true }: { title: string; children: React.ReactNode; defaultOpen?: boolean }) {
+function CollapsibleCard({ title, children, defaultOpen = true, onEdit, editAriaLabel }: { title: string; children: React.ReactNode; defaultOpen?: boolean; onEdit?: () => void; editAriaLabel?: string }) {
   const [open, setOpen] = useState(!!defaultOpen);
   return (
     <div className="layered-card-outer--solid rounded-2xl border border-[#E9EAEB] p-2" style={{ background: '#F9FAFB' }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '6px 8px 0 8px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <button
+            type="button"
+            onClick={() => setOpen(v => !v)}
+            aria-label={open ? 'Collapse section' : 'Expand section'}
+            style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: 'transparent', border: 'none', cursor: 'pointer' }}
+          >
+            <i className={`la ${open ? 'la-angle-up' : 'la-angle-down'}`} style={{ fontSize: 18, color: '#667085' }} aria-hidden="true" />
+            <h3 style={{ fontSize: 16, fontWeight: 600, color: '#181D27', margin: 0 }}>{title}</h3>
+          </button>
+        </div>
         <button
           type="button"
-          onClick={() => setOpen(v => !v)}
-          aria-label={open ? 'Collapse section' : 'Expand section'}
-          style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: 'transparent', border: 'none', cursor: 'pointer' }}
+          onClick={onEdit ?? (() => {})}
+          disabled={!onEdit}
+          aria-disabled={!onEdit}
+          aria-label={editAriaLabel || `Edit ${title}`}
+          title={editAriaLabel || `Edit ${title}`}
+          style={{ width: 32, height: 32, borderRadius: '50%', background: '#FFFFFF', border: '1px solid #E9EAEB', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: onEdit ? 'pointer' : 'default', opacity: onEdit ? 1 : 0.7 }}
         >
-          <i className={`la ${open ? 'la-angle-up' : 'la-angle-down'}`} style={{ fontSize: 18, color: '#667085' }} aria-hidden="true"></i>
-          <h3 style={{ fontSize: 16, fontWeight: 600, color: '#181D27', margin: 0 }}>{title}</h3>
+          <i className="la la-edit" style={{ fontSize: 16, color: '#181D27' }} aria-hidden="true"></i>
         </button>
       </div>
       {open && (
