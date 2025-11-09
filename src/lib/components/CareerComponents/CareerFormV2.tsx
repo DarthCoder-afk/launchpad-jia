@@ -740,6 +740,11 @@ export default function CareerForm({ career, formType, setShowEditModal }: { car
               onChangeSecretPrompt={(val) => setAiSecretPrompt(val)}
               initialCategories={step3Categories}
               onCategoriesChange={(cats) => setStep3Categories(cats)}
+              // Auto-sync AI screening with CV screening by passing shared value/setter
+              screeningSetting={screeningSetting}
+              onChangeScreeningSetting={(val) => setScreeningSetting(val)}
+              requireVideo={requireVideo}
+              onChangeRequireVideo={(val) => setRequireVideo(val)}
             />
           )}
           {step === 4 && (
