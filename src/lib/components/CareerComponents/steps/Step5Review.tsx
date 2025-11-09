@@ -300,7 +300,7 @@ export default function Step5Review(props: Step5ReviewProps) {
 
       {/* Section: Pipeline Stages (Step 4 static summary) */}
       <CollapsibleCard title="Pipeline Stages" defaultOpen>
-        <div style={{ background: '#FFFFFF', border: '1px solid #EAECF0', borderRadius: 16, padding: 16 }}>
+        <div style={{ background: '#FFFFFF',  borderRadius: 16, padding: 16 }}>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(210px,1fr))', gap: 16 }}>
             {renderPipelineStage('CV Screening', 'la la-user', ['Waiting Submission', 'For Review'])}
             {renderPipelineStage('AI Interview', 'la la-microphone', ['Waiting Interview', 'For Review'])}
@@ -492,10 +492,10 @@ function renderScreeningSettingPill(setting?: string) {
       <span style={{
         display: 'inline-block',
         padding: '1px 8px',
-        border: '1px solid #D5D7DA',
+        border: '1px solid #B2DDFF',
         borderRadius: 999,
-        background: '#FFFFFF',
-        color: '#181D27',
+        background: '#EFF8FF',
+        color: '#175CD3',
         fontSize: 12,
         lineHeight: '18px',
         fontWeight: 500,
