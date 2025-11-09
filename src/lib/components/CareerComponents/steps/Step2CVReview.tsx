@@ -53,6 +53,7 @@ export interface Step2CVReviewProps {
 	screeningSetting?: string; // e.g. "Good Fit and above"
 	onChangeScreeningSetting?: (val: string) => void;
 	secretPrompt?: string; // raw prompt text
+	onChangeSecretPrompt?: (val: string) => void;
 	preScreeningQuestions: PreScreeningQuestion[];
 	setPreScreeningQuestions: (updater: PreScreeningQuestion[] | ((prev: PreScreeningQuestion[]) => PreScreeningQuestion[])) => void;
 	suggestedQuestions?: Array<{ key: string; title: string; description: string }>; // default suggestions
@@ -74,6 +75,7 @@ export default function Step2CVReview({
 	screeningSetting = "Good Fit and above",
 	onChangeScreeningSetting,
 	secretPrompt,
+	onChangeSecretPrompt,
 	preScreeningQuestions,
 	setPreScreeningQuestions,
 	suggestedQuestions = defaultSuggested,
@@ -296,27 +298,47 @@ export default function Step2CVReview({
 								Secret Prompts give you extra control over Jia's evaluation style, complementing her accurate
 								assessment of requirements from the job description.
 							</p>
-							<div
-								style={{
-									border: "1px solid #D5D7DA",
-									borderRadius: 12,
-									background: "#FFFFFF",
-									padding: 16,
-									fontSize: 14,
-									color: "#181D27",
-									minHeight: 140,
-									maxHeight: 220,
-									overflowY: "auto",
-								}}
-							>
-								{secretPrompt ? (
-									<pre style={{ margin: 0, whiteSpace: "pre-wrap", fontFamily: "inherit", lineHeight: 1.5 }}>{secretPrompt}</pre>
-								) : (
-									<p className="text-md font-light text-gray-500">
-                                        Enter a secret prompt (e.g. Give higher fit scores to candidates who participate in hackathons or competitions.)
-                                    </p>
-								)}
-							</div>
+							{onChangeSecretPrompt ? (
+								<textarea
+									value={secretPrompt || ""}
+									onChange={(e) => onChangeSecretPrompt?.(e.target.value)}
+									placeholder="Enter a secret prompt (e.g. Give higher fit scores to candidates who participate in hackathons or competitions.)"
+									style={{
+										width: "100%",
+										border: "1px solid #D5D7DA",
+										borderRadius: 12,
+										background: "#FFFFFF",
+										padding: 16,
+										fontSize: 14,
+										color: "#181D27",
+										minHeight: 140,
+										maxHeight: 220,
+										resize: "vertical",
+									}}
+								/>
+							) : (
+								<div
+									style={{
+										border: "1px solid #D5D7DA",
+										borderRadius: 12,
+										background: "#FFFFFF",
+										padding: 16,
+										fontSize: 14,
+										color: "#181D27",
+										minHeight: 140,
+										maxHeight: 220,
+										overflowY: "auto",
+									}}
+								>
+									{secretPrompt ? (
+										<pre style={{ margin: 0, whiteSpace: "pre-wrap", fontFamily: "inherit", lineHeight: 1.5 }}>{secretPrompt}</pre>
+									) : (
+										<p className="text-md font-light text-gray-500">
+											Enter a secret prompt (e.g. Give higher fit scores to candidates who participate in hackathons or competitions.)
+										</p>
+									)}
+								</div>
+							)}
 						</div>
 					</div>
 				</div>
