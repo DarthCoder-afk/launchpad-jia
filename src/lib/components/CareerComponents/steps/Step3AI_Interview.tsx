@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useImperativeHandle, useMemo, useState, forwardRef } from "react";
+import CustomDropdown from "@/lib/components/CareerComponents/CustomDropdown";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
@@ -40,10 +41,15 @@ interface Step3Props {
 	onCategoriesChange?: (categories: Category[]) => void; // sync upward for persistence
 	secretPromptEditable?: boolean; // future flag if needed
 	onChangeSecretPrompt?: (val: string) => void; // new handler to persist AI secret prompt
+	// NEW: AI interview screening + require video controls (optional props so parent can ignore if not wiring yet)
+	screeningSetting?: string; // e.g., "Good Fit and above"
+	onChangeScreeningSetting?: (val: string) => void;
+	requireVideo?: boolean;
+	onChangeRequireVideo?: (val: boolean) => void;
 }
 
 const Step3AI_Interview = forwardRef<Step3InterviewRef, Step3Props>(
-({ jobDescription, secretPrompt, initialCategories, onCategoriesChange, onChangeSecretPrompt }, ref) => {
+({ jobDescription, secretPrompt, initialCategories, onCategoriesChange, onChangeSecretPrompt, screeningSetting = "Good Fit and above", onChangeScreeningSetting, requireVideo, onChangeRequireVideo }, ref) => {
 	const [loadingAll, setLoadingAll] = useState(false);
 	const [loadingIdx, setLoadingIdx] = useState<number | null>(null);
 	const [showMinError, setShowMinError] = useState(false);
@@ -227,29 +233,12 @@ const Step3AI_Interview = forwardRef<Step3InterviewRef, Step3Props>(
 							<p className="text-sm text-[#666666] mb-3">
 								Jia automatically endorses candidates who meet the chosen criteria.
 							</p>
-							<button
-								type="button"
-								style={{
-									display: "inline-flex",
-									alignItems: "center",
-									gap: 6,
-									border: "1px solid #E9EAEB",
-									padding: "10px 12px",
-									borderRadius: 9,
-									background: "#FFFFFF",
-									color: "#181D27",
-									fontSize: 13,
-									minWidth: 220,
-									justifyContent: "space-between",
-								}}
-								aria-label="AI interview screening selection"
-							>
-								<span style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
-									<i className="la la-check-circle" style={{ fontSize: 14, color: "#667085" }} aria-hidden="true"></i>
-									Good Fit and above
-								</span>
-								<i className="la la-angle-down" style={{ fontSize: 14, color: "#667085" }}></i>
-							</button>
+							<CustomDropdown
+								onSelectSetting={(val) => onChangeScreeningSetting?.(val)}
+								screeningSetting={screeningSetting}
+								settingList={[{ name: "Good Fit and above" }, { name: "Only Strong Fit" }, { name: "No Automatic Promotion" }]}
+								placeholder="Choose screening criteria"
+							/>
 						</div>
 
 						{/* Divider */}
@@ -268,18 +257,18 @@ const Step3AI_Interview = forwardRef<Step3InterviewRef, Step3Props>(
 									<i className="la la-video" aria-hidden="true" style={{ fontSize: 16, color: "#667085" }}></i>
 									<span>Require Video Interview</span>
 								</div>
-								{/* Static ON toggle with Yes label */}
+								{/* Toggle defaults to Yes when undefined; calls back when parent wired */}
 								<div style={{ display: "inline-flex", alignItems: "center", gap: 10 }}>
 									<label className="switch" style={{ margin: 0 }}>
-                                    <input
-                                        type="checkbox"
-                                        checked={null}
-                                        readOnly
-                                    />
-                                    <span className="slider round"></span>
-                                    </label>
-                                    <span style={{ fontSize: 14, color: "#181D27", fontWeight: 500 }}>Yes</span>
-                                    </div>
+										<input
+											type="checkbox"
+											checked={requireVideo ?? true}
+											onChange={(e) => onChangeRequireVideo?.(e.target.checked)}
+										/>
+										<span className="slider round"></span>
+									</label>
+									<span style={{ fontSize: 14, color: "#181D27", fontWeight: 500 }}>{(requireVideo ?? true) ? "Yes" : "No"}</span>
+								</div>
 							</div>
 						</div>
 
