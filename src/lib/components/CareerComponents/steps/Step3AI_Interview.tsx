@@ -7,22 +7,22 @@ import "react-toastify/dist/ReactToastify.css";
 // Functional UI for Step 3: AI Interview Setup – adds generation and editing controls.
 
 export type Step3InterviewRef = {
-  validateQuestions: () => boolean;
+	validateQuestions: () => boolean;
 };
 
 const MIN_TOTAL_QUESTIONS = 5;
 
-type Question = {
-	text: string;
-	source: "ai" | "manual";
-	editing: boolean; // true when input is editable
+export type Question = {
+  text: string;
+  source: "ai" | "manual";
+  editing: boolean; // true when input is editable
 };
 
-type Category = {
-	label: string;
-	questions: Question[];
-	askCount: number;
-	showAskCount?: boolean;
+export type Category = {
+  label: string;
+  questions: Question[];
+  askCount: number;
+  showAskCount?: boolean;
 };
 
 type GeneratePayload = {
@@ -33,19 +33,29 @@ type GeneratePayload = {
 	existingQuestions?: string[];
 };
 
-const Step3AI_Interview = forwardRef<Step3InterviewRef, { jobDescription?: string; secretPrompt?: string }>(
-({ jobDescription, secretPrompt }, ref) => {
+interface Step3Props {
+	jobDescription?: string;
+	secretPrompt?: string; // existing (unused currently) job-level prompt if needed
+	initialCategories?: Category[]; // allow parent to hydrate from draft
+	onCategoriesChange?: (categories: Category[]) => void; // sync upward for persistence
+	secretPromptEditable?: boolean; // future flag if needed
+	onChangeSecretPrompt?: (val: string) => void; // new handler to persist AI secret prompt
+}
+
+const Step3AI_Interview = forwardRef<Step3InterviewRef, Step3Props>(
+({ jobDescription, secretPrompt, initialCategories, onCategoriesChange, onChangeSecretPrompt }, ref) => {
 	const [loadingAll, setLoadingAll] = useState(false);
 	const [loadingIdx, setLoadingIdx] = useState<number | null>(null);
 	const [showMinError, setShowMinError] = useState(false);
-		// Start with empty questions; user will generate them (no static seed)
-		const [categories, setCategories] = useState<Category[]>([
+		// Hydrate from parent if provided; else default empty categories
+		const defaultCategories: Category[] = [
 			{ label: "CV Validation / Experience", questions: [], askCount: 2, showAskCount: false },
 			{ label: "Technical", questions: [], askCount: 2, showAskCount: false },
 			{ label: "Behavioral", questions: [], askCount: 2, showAskCount: false },
 			{ label: "Analytical", questions: [], askCount: 2, showAskCount: false },
 			{ label: "Others", questions: [], askCount: 2, showAskCount: false },
-		]);
+		];
+		const [categories, setCategories] = useState<Category[]>(() => initialCategories && initialCategories.length > 0 ? initialCategories : defaultCategories);
 
 	const totalQuestions = useMemo(
 		() => categories.reduce((sum, c) => sum + c.questions.length, 0),
@@ -65,6 +75,13 @@ const Step3AI_Interview = forwardRef<Step3InterviewRef, { jobDescription?: strin
 			setShowMinError(false);
 		}
 	}, [totalQuestions, showMinError]);
+
+	// Sync categories upward for persistence when they change
+	useEffect(() => {
+		if (onCategoriesChange) {
+			onCategoriesChange(categories);
+		}
+	}, [categories, onCategoriesChange]);
 
 	async function generateForIndex(index: number) {
 		const cat = categories[index];
@@ -269,49 +286,50 @@ const Step3AI_Interview = forwardRef<Step3InterviewRef, { jobDescription?: strin
 						{/* Divider */}
 						<div style={{ height: 1, background: "#E9EAEB", width: "100%" }} />
 
-						{/* AI Interview Secret Prompt (optional) */}
-						<div>
-							<div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 8 }}>
-								<h3 className="font-medium text-[#181D27]" style={{ fontWeight: 600, marginBottom: 0 }}>
-									<span style={{ marginRight: 4 }}>
-										  <img
-                                            className="m-1"
-                                            src="/career_form_svg/star.svg"
-                                            width={20}
-                                            height={20}
-                                            alt="light bulb icon"
-                                            aria-hidden="true"
-                                        />
-									</span>
-									AI Interview Secret Prompt <span className="text-[#667085]" style={{ fontWeight: 400 }}>(optional)</span>
-								</h3>
-								<i
-									className="la la-question-circle"
-									style={{ fontSize: 16, color: "#667085", cursor: "default" }}
-									title="Secret Prompts help refine Jia's evaluation against role-specific nuances."
-								></i>
-							</div>
-							<p className="text-sm text-[#666666] mb-3" style={{ lineHeight: 1.5 }}>
-								Secret Prompts give you extra control over Jia's evaluation style, complementing her accurate
-								assessment of requirements from the job description.
-							</p>
-							<div
-								style={{
-									border: "1px solid #D5D7DA",
-									borderRadius: 12,
-									background: "#FFFFFF",
-									padding: 16,
-									fontSize: 14,
-									color: "#181D27",
-									minHeight: 140,
-								}}
-							>
-								<p className="text-md font-light text-gray-500" style={{ margin: 0 }}>
-									Enter a secret prompt (e.g. Treat candidates who speak in Taglish, English, or Tagalog equally.
-									Focus on clarity, coherence, and confidence rather than language preference or accent.)
-								</p>
-							</div>
-						</div>
+										{/* AI Interview Secret Prompt (optional, now editable) */}
+										<div>
+											<div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 8 }}>
+												<h3 className="font-medium text-[#181D27]" style={{ fontWeight: 600, marginBottom: 0 }}>
+													<span style={{ marginRight: 4 }}>
+														<img
+															className="m-1"
+															src="/career_form_svg/star.svg"
+															width={20}
+															height={20}
+															alt="sparkle icon"
+															aria-hidden="true"
+														/>
+													</span>
+													AI Interview Secret Prompt <span className="text-[#667085]" style={{ fontWeight: 400 }}>(optional)</span>
+												</h3>
+												<i
+													className="la la-question-circle"
+													style={{ fontSize: 16, color: "#667085", cursor: "default" }}
+													title="Secret Prompts help refine Jia's evaluation against role-specific nuances."
+												></i>
+											</div>
+											<p className="text-sm text-[#666666] mb-3" style={{ lineHeight: 1.5 }}>
+												Secret Prompts give you extra control over Jia's evaluation style, complementing her accurate
+												assessment of requirements from the job description.
+											</p>
+											<textarea
+												value={secretPrompt ?? ""}
+												onChange={(e) => onChangeSecretPrompt?.(e.target.value)}
+												placeholder="Enter a secret prompt (e.g. Give higher scores to answers demonstrating structured problem-solving before proposing solutions.)"
+												style={{
+													width: "100%",
+													minHeight: 140,
+													resize: "vertical",
+													padding: 14,
+													borderRadius: 12,
+													border: "1px solid #D5D7DA",
+													background: "#FFFFFF",
+													fontSize: 14,
+													color: "#181D27",
+													lineHeight: 1.5,
+												}}
+											/>
+										</div>
 					</div>
 				</div>
 
