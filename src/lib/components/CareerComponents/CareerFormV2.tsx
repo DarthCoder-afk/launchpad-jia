@@ -14,7 +14,7 @@ import Step3AI_Interview, { type Step3InterviewRef, type Category as Step3Catego
 import Step4Pipeline from "./steps/Step4Pipeline";
 import Step5Review from "./steps/Step5Review";
 import { useAutoSaveDraft } from "@/lib/hooks/useAutoSaveDraft";
-import { loadDraft } from "@/lib/utils/draftStorage";
+import { loadDraft, clearDraft } from "@/lib/utils/draftStorage";
   // (Removed local option lists and unused UI imports to keep this component lean)
 
 export default function CareerForm({ career, formType, setShowEditModal }: { career?: any, formType: string, setShowEditModal?: (show: boolean) => void }) {
@@ -216,6 +216,10 @@ export default function CareerForm({ career, formType, setShowEditModal }: { car
                     </div>,
                     1300,
                 <i className="la la-check-circle" style={{ color: "#039855", fontSize: 32 }}></i>)
+        // Clear local draft when publishing
+        if (status === 'active') {
+          clearDraft(draftKey);
+        }
                 setTimeout(() => {
                     window.location.href = `/recruiter-dashboard/careers/manage/${career._id}`;
                 }, 1300);
@@ -288,6 +292,9 @@ export default function CareerForm({ career, formType, setShowEditModal }: { car
                 </div>,
                 1300, 
             <i className="la la-check-circle" style={{ color: "#039855", fontSize: 32 }}></i>)
+      if (status === 'active') {
+        clearDraft(draftKey);
+      }
             setTimeout(() => {
                 window.location.href = `/recruiter-dashboard/careers`;
             }, 1300);
@@ -403,51 +410,13 @@ export default function CareerForm({ career, formType, setShowEditModal }: { car
         });
     }, [user]);
 
-    // Mock data for development/testing
-    const getMockMembers = () => {
-        const mockMembers = [
-            {
-                email: "sabine@whitecloak.com",
-                name: "Sabine Beatrix Dy",
-                image: "https://api.dicebear.com/9.x/shapes/svg?seed=sabine@whitecloak.com",
-                role: "admin"
-            },
-            {
-                email: "john.doe@whitecloak.com",
-                name: "John Doe",
-                image: "https://api.dicebear.com/9.x/shapes/svg?seed=john.doe@whitecloak.com",
-                role: "hiring_manager"
-            },
-            {
-                email: "jane.smith@whitecloak.com",
-                name: "Jane Smith",
-                image: "https://api.dicebear.com/9.x/shapes/svg?seed=jane.smith@whitecloak.com",
-                role: "hiring_manager"
-            }
-        ];
-        
-        // Add current user if not in mock data
-        if (user && user.email && !mockMembers.some(m => m.email === user.email)) {
-            mockMembers.unshift({
-                email: user.email,
-                name: user.name,
-                image: user.image || `https://api.dicebear.com/9.x/shapes/svg?seed=${user.email}`,
-                role: "admin"
-            });
-        }
-        
-        return mockMembers;
-    };
-
-    // Fetch all members from organization
+  // Fetch all members from organization (no mock fallback)
     useEffect(() => {
         const fetchMembers = async () => {
-            // Use mock data if orgID is not available (bypassing admin side)
-            if (!orgID) {
-                const mockMembers = getMockMembers();
-                setAvailableMembers(mockMembers);
-                return;
-            }
+      if (!orgID) { // organization unresolved
+        setAvailableMembers([]);
+        return;
+      }
 
             try {
                 const response = await axios.get("/api/search-members", {
@@ -473,11 +442,9 @@ export default function CareerForm({ career, formType, setShowEditModal }: { car
                         });
                     }
                 }
-            } catch (error) {
-                console.error("Failed to fetch members:", error);
-                // Fall back to mock data on error
-                const mockMembers = getMockMembers();
-                setAvailableMembers(mockMembers);
+      } catch (error) {
+        console.error("Failed to fetch members:", error);
+        setAvailableMembers([]); // silent empty state
             }
         };
         fetchMembers();
