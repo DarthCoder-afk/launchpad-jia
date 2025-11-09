@@ -121,6 +121,9 @@ export default function Step1CareerDetails({
                                     screeningSetting={country}
                                     settingList={[{ name: "Philippines" }]}
                                 />
+                                {showValidation && !country && (
+                                    <span style={{ color: "#EF4444", fontSize: "12px" }}>This is a required field.</span>
+                                )}
                             </div>
 
                             <div style={{ flex: 1 }}>
@@ -139,6 +142,9 @@ export default function Step1CareerDetails({
                                     settingList={provinceList}
                                     placeholder="Choose province"
                                 />
+                                {showValidation && !province && (
+                                    <span style={{ color: "#EF4444", fontSize: "12px" }}>This is a required field.</span>
+                                )}
                             </div>
 
                             <div style={{ flex: 1 }}>
@@ -149,6 +155,9 @@ export default function Step1CareerDetails({
                                     settingList={cityList}
                                     placeholder="Choose city"
                                 />
+                                {showValidation && !city && (
+                                    <span style={{ color: "#EF4444", fontSize: "12px" }}>This is a required field.</span>
+                                )}
                             </div>
                         </div>
                     </div>
@@ -206,6 +215,9 @@ export default function Step1CareerDetails({
                                         PHP
                                     </div>
                                 </div>
+                                {showValidation && !minimumSalary && (
+                                    <span style={{ color: "#EF4444", fontSize: "12px" }}>This is a required field.</span>
+                                )}
                             </div>
 
                             <div style={{ flex: 1 }}>
@@ -257,6 +269,9 @@ export default function Step1CareerDetails({
                                         PHP
                                     </div>
                                 </div>
+                                {showValidation && !maximumSalary && (
+                                    <span style={{ color: "#EF4444", fontSize: "12px" }}>This is a required field.</span>
+                                )}
                             </div>
 
                             <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 0 }}>
