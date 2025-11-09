@@ -424,7 +424,22 @@ export default function Step2CVReview({
 													borderRadius: 5,
 												}}
 											>
-												<p style={{ padding: 16, margin: 0, fontSize: 14, fontWeight: 600, color: "#181D27" }}>{q.title}</p>
+												{/* Inline editable title input to match UX: input on the left, type selector on the right */}
+												<input
+													value={q.title}
+													onChange={(e) => updateQuestionTitle(q.id, e.target.value)}
+													placeholder="Write your question..."
+													style={{
+														flex: 1,
+														margin: 0,
+														border: '1px solid #E9EAEB',
+														background: '#FFFFFF',
+														color: '#181D27',
+														fontSize: 14,
+														borderRadius: 8,
+														padding: '10px 12px',
+													}}
+												/>
 												<div style={{ position: "relative" }}>
 													<button
 														onClick={() => setTypeMenuOpenFor((cur) => (cur === q.id ? null : q.id))}
