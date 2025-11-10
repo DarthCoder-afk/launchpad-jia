@@ -209,10 +209,10 @@ This section documents the changes completed for Tickets 1–3. Ticket 4 (Pre‑
 - Connected external services and verified a working local build.
 - Added explicit environment variables and wiring for the Core API.
 
-Use the following Core API URL provided in the ticket:
+Set your Core API base URL in `.env`:
 
 ```
-NEXT_PUBLIC_CORE_API_URL=https://jia-jvx-1aoebad0e6dd.herokuapp.com
+NEXT_PUBLIC_CORE_API_URL=<your_core_api_url>
 ```
 
 Checklist of required environment variables (see `.env.example`):
@@ -221,7 +221,7 @@ Checklist of required environment variables (see `.env.example`):
 OPENAI_API_KEY=your_openai_api_key
 MONGODB_URI=your_mongodb_connection_string
 FIREBASE_SERVICE_ACCOUNT=your_firebase_service_account_json
-NEXT_PUBLIC_CORE_API_URL=https://jia-jvx-1aoebad0e6dd.herokuapp.com
+NEXT_PUBLIC_CORE_API_URL=<your_core_api_url>
 ```
 
 ### Ticket 2 — Segmented "Add new career" form (Steps 1–5)
