@@ -223,17 +223,99 @@ export default function Step5Review(props: Step5ReviewProps) {
           <div style={{ height: 1, background: '#E5E7EB', margin: '12px 0' }} />
 
           {/* Row: Require Video (Field) */}
-          <div style={{ marginBottom: 12 }}>
-            <Field
-              label="Require Video on Interview"
-              value={
-                <div style={{ color: '#414651', display: 'flex', alignItems: 'center', gap: 8 }}>
-                  <i className="la la-video" style={{ color: '#667085' }} aria-hidden="true"></i>
-                  {requireVideo ? 'Yes' : 'No'}
-                </div>
-              }
-            />
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              width: '100%',
+              marginBottom: 12,
+            }}
+          >
+            {/* Label */}
+            <div
+              style={{
+                fontWeight: 600,
+                color: '#0F172A',
+                fontSize: 14,
+                lineHeight: 1.4,
+              }}
+            >
+              Require Video on Interview
+            </div>
+
+            {/* Dynamic Value */}
+            {requireVideo ? (
+              // ✅ YES STATE
+              <div
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'flex-end',
+                  gap: 6,
+                  color: '#027A48',
+                  fontWeight: 500,
+                  lineHeight: 1,
+                }}
+              >
+                <span style={{ lineHeight: 1 }}>Yes</span>
+                <span
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    width: 18,
+                    height: 18,
+                    borderRadius: '50%',
+                    border: '1px solid #A6F4C5',
+                    backgroundColor: '#ECFDF3',
+                    flexShrink: 0,
+                  }}
+                >
+                  <i
+                    className="la la-check"
+                    aria-hidden="true"
+                    style={{ fontSize: 13, color: '#12B76A', lineHeight: 1 }}
+                  ></i>
+                </span>
+              </div>
+            ) : (
+              // ❌ NO STATE
+              <div
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'flex-end',
+                  gap: 6,
+                  color: '#B42318',
+                  fontWeight: 500,
+                  lineHeight: 1,
+                }}
+              >
+                <span style={{ lineHeight: 1 }}>No</span>
+                <span
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    width: 18,
+                    height: 18,
+                    borderRadius: '50%',
+                    border: '1px solid #FEE4E2',
+                    backgroundColor: '#FEF3F2',
+                    flexShrink: 0,
+                  }}
+                >
+                  <i
+                    className="la la-times"
+                    aria-hidden="true"
+                    style={{ fontSize: 13, color: '#F04438', lineHeight: 1 }}
+                  ></i>
+                </span>
+              </div>
+            )}
           </div>
+      
           <div style={{ height: 1, background: '#E5E7EB', margin: '12px 0' }} />
 
           {/* Row: AI Secret Prompt (Field) */}
