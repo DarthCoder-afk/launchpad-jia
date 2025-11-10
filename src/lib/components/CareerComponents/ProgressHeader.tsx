@@ -71,7 +71,7 @@ export default function ProgressHeader({ step, totalSteps, currentStepPartial, f
                     width: 20,
                     height: 20,
                     borderRadius: "50%",
-                    backgroundColor: isActive ? "#FFFFFF" : isCompleted ? "#000000" : "#E5E7EB",
+                    backgroundColor: isActive ? "#FFFFFF" : isCompleted ? "#000000" : "#ffffffff",
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
@@ -110,11 +110,12 @@ export default function ProgressHeader({ step, totalSteps, currentStepPartial, f
                   style={{
                     position: "absolute",
                     top: 10,
-                    left: "50%",
-                    width: "100%",
-                    height: 5,
+                    left: "calc(50% + 20px)",      
+                    width: "calc(100% - 40px)",     
+                    height: 4,                      
                     backgroundColor: "#E5E7EB",
-                    zIndex: 0,
+                    borderRadius: 9999,             
+                    zIndex: 1,
                     overflow: "hidden",
                   }}
                   className="md:top-3 md:h-1"
@@ -142,11 +143,11 @@ export default function ProgressHeader({ step, totalSteps, currentStepPartial, f
                   fontSize: "15px",
                   color: isActive || isCompleted ? "#181D27" : "#6B7280",
                   fontWeight: isActive ? 600 : isCompleted ? 600 : 400,
-                  marginTop: 6,
-                  textAlign: "center",
+                  marginTop: 12,
                   whiteSpace: "normal",
                   lineHeight: "1.2",
                   padding: "0 2px",
+
                 }}
                 className="md:text-xs md:mt-2 md:whitespace-nowrap md:px-0"
               >
