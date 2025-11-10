@@ -344,7 +344,7 @@ export default function Step2CVReview({
 				</div>
 
 				{/* 2. Pre-Screening Questions */}
-				<div className="layered-card-outer--solid rounded-2xl border border-[#E9EAEB] p-2">
+				<div className="layered-card-outer--solid rounded-2xl border border-[#E9EAEB] p-2 mb-5">
 					<div
 						className="flex w-full flex-nowrap items-center justify-between gap-3 px-4 py-3"
 						style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "nowrap", gap: 12 }}

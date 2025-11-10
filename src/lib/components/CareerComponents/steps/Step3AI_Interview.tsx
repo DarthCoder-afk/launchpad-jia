@@ -537,22 +537,7 @@ const Step3AI_Interview = forwardRef<Step3InterviewRef, Step3Props>(
 											))}
 										</div>
 									)}
-									{cat.questions.length === 0 && (
-										<div
-											style={{
-												width: '100%',
-												border: '1px dashed #D5D7DA',
-												borderRadius: 12,
-												padding: '12px',
-												color: '#667085',
-												textAlign: 'center',
-											}}
-											onDragOver={(e) => handleDragOver(idx, 0, e)}
-											onDrop={(e) => handleDropOnEmpty(idx, e)}
-										>
-											Drag questions here
-										</div>
-									)}
+									
                                     <div style={{ width: '100%', display: "flex", alignItems: "center", justifyContent: 'space-between', gap: 12 }}>
                                         <div style={{ display: 'inline-flex', alignItems: 'center', gap: 12 }}>
 											<button
