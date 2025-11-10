@@ -1,3 +1,41 @@
+ /**
+   * Wizard Step Mapping (totalSteps = 5)
+   *  Step 1: Career Details & Team Access
+   *    - Component: Step1CareerDetails
+   *    - Core state: jobTitle, jobDescription, employmentType, workSetup/workSetupRemarks, location (country/province/city),
+   *      salaryNegotiable + minimumSalary/maximumSalary, teamMembers management.
+   *    - Validation: Basic required fields (title, job description, employmentType, workSetup, province, city, minimumSalary, and maximumSalary) must be present.
+   *    - Draft: All fields auto-saved.
+   *
+   *  Step 2: CV Review & Pre-screening
+   *    - Component: Step2CVReview
+   *    - Core state: screeningSetting (shared later), secretPrompt, preScreeningQuestions[] collection.
+   *    - Validation: Currently relaxed (always returns true) to allow forward navigation while UI evolves.
+   *    - Draft: screeningSetting, secretPrompt, preScreeningQuestions persisted.
+   *
+   *  Step 3: AI Interview Setup
+   *    - Component: Step3AI_Interview (ref: step3Ref)
+   *    - Core state: aiSecretPrompt, requireVideo, screeningSetting (shared), step3Categories[] (each with questions/editing flags).
+   *    - Validation: Performed via step3Ref.validateQuestions() in handleSaveAndContinue; must have >=5 saved (editing=false) non-empty questions.
+   *    - Progress Enhancement: When on Step 3 and >=5 saved questions, progress bar shows half connector toward Step 4.
+   *    - Draft: aiSecretPrompt, requireVideo, screeningSetting, step3Categories persisted.
+   *
+   *  Step 4: Pipeline Stages
+   *    - Component: Step4Pipeline (static summary / configuration placeholder).
+   *    - Core state: None new added here; derives from earlier steps.
+   *    - Validation: Always true (non-blocking); final checks deferred to publish.
+   *
+   *  Step 5: Review Career
+   *    - Component: Step5Review
+   *    - Core state aggregated: All prior step states displayed for confirmation.
+   *    - Actions: Publish (active) or Save Draft (draft). Clearing draft storage if published.
+   *    - Validation: Final server-side logic on publish; UI trusts earlier validations.
+   *
+   * Error Icon Behavior (errorSteps array):
+   *  - Step 1: Icon persists until ALL required fields valid (auto-clears in useEffect when valid).
+   *  - Step 3: Icon set when user attempts to proceed without enough saved questions; auto-clears once >=5 saved questions.
+   */
+
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
