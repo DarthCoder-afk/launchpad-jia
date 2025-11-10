@@ -264,10 +264,14 @@ export default function CareerForm({
       screeningSetting,
       requireVideo,
       salaryNegotiable,
-      minimumSalary: isNaN(Number(minimumSalary))
+      minimumSalary: salaryNegotiable
+        ? null
+        : isNaN(Number(minimumSalary))
         ? null
         : Number(minimumSalary),
-      maximumSalary: isNaN(Number(maximumSalary))
+      maximumSalary: salaryNegotiable
+        ? null
+        : isNaN(Number(maximumSalary))
         ? null
         : Number(maximumSalary),
       country,
@@ -351,10 +355,14 @@ export default function CareerForm({
         orgID,
         requireVideo,
         salaryNegotiable,
-        minimumSalary: isNaN(Number(minimumSalary))
+        minimumSalary: salaryNegotiable
+          ? null
+          : isNaN(Number(minimumSalary))
           ? null
           : Number(minimumSalary),
-        maximumSalary: isNaN(Number(maximumSalary))
+        maximumSalary: salaryNegotiable
+          ? null
+          : isNaN(Number(maximumSalary))
           ? null
           : Number(maximumSalary),
         country,

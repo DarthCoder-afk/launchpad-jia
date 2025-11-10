@@ -18,45 +18,45 @@ export default function Step1CareerDetails({
   setCountry,
   province,
   setProvince,
-  city,
-  setCity,
-  provinceList,
-  cityList,
-  setCityList,
-  philippineCitiesAndProvinces,
-  salaryNegotiable,
-  setSalaryNegotiable,
-  minimumSalary,
-  setMinimumSalary,
-  maximumSalary,
-  setMaximumSalary,
-  showValidation,
-  teamMembers,
-  availableMembers,
-  user,
-  roleOptions,
-  handleRoleChange,
-  handleAddMember,
-  handleRemoveMember,
-  getAvailableMembersToAdd,
-  addMemberDropdownRef,
-  showAddMemberDropdown,
-  setShowAddMemberDropdown,
+    city,
+    setCity,
+    provinceList,
+    cityList,
+    setCityList,
+    philippineCitiesAndProvinces,
+    salaryNegotiable,
+    setSalaryNegotiable,
+    minimumSalary,
+    setMinimumSalary,
+    maximumSalary,
+    setMaximumSalary,
+    showValidation,
+    teamMembers,
+    availableMembers,
+    user,
+    roleOptions,
+    handleRoleChange,
+    handleAddMember,
+    handleRemoveMember,
+    getAvailableMembersToAdd,
+    addMemberDropdownRef,
+    showAddMemberDropdown,
+        setShowAddMemberDropdown,
 }: any) {
-  return (
-    <div
-      style={{
-        display: "flex",
-        justifyContent: "center",
-        width: "100%",
-        gap: 20,
-        alignItems: "flex-start",
-        marginTop: 16,
-        maxWidth: 1500,
-        marginLeft: "auto",
-        marginRight: "auto",
-      }}
-    >
+    return (
+        <div
+            style={{
+                display: "flex",
+                justifyContent: "center",
+                width: "100%",
+                gap: 20,
+                alignItems: "flex-start",
+                marginTop: 16,
+                maxWidth: 1500,
+                marginLeft: "auto",
+                marginRight: "auto",
+            }}
+        >
       {/* === LEFT COLUMN === */}
         <div style={{ width: "100%", display: "flex", flexDirection: "column", gap: 24 }}>
             {/* Career Information */}
@@ -68,10 +68,10 @@ export default function Step1CareerDetails({
                         <h3 className="font-medium text-[#181D27] mb-2">Basic Information</h3>
                         <label className="block text-sm text-[#414651] mb-1">Job Title</label>
                         <input
-                            value={jobTitle}
-                            className="form-control w-full border border-[#D5D7DA] rounded-lg p-2.5 focus:outline-none focus:ring-1 focus:ring-[#181D27]"
-                            placeholder="Enter job title"
-                            onChange={(e) => setJobTitle(e.target.value)}
+                          value={jobTitle}
+                          className="form-control w-full border border-[#D5D7DA] rounded-lg p-2.5 focus:outline-none focus:ring-1 focus:ring-[#181D27]"
+                          placeholder="Enter job title"
+                          onChange={(e) => setJobTitle(e.target.value)}
                         />
                         {showValidation && !jobTitle && (
                             <span style={{ color: "#EF4444", fontSize: "12px" }}>This is a required field.</span>
@@ -184,21 +184,22 @@ export default function Step1CareerDetails({
                                     }}>
                                         ₱
                                     </div>
-                                    <input
-                                        type="number"
-                                        className="form-control"
-                                        placeholder="0"
-                                        min={0}
-                                        value={minimumSalary}
-                                        onChange={(e) => setMinimumSalary(e.target.value)}
-                                        style={{
-                                        borderTopRightRadius: 0,
-                                        borderBottomRightRadius: 0,
-                                        borderRight: "none",
-                                        borderLeft: "none",
-                                        flex: 1
-                                        }}
-                                    />
+                                                                        <input
+                                                                            type="number"
+                                                                            className="form-control"
+                                                                            placeholder="0"
+                                                                            min={0}
+                                                                            value={salaryNegotiable ? "" : minimumSalary}
+                                                                            disabled={salaryNegotiable}
+                                                                            onChange={(e) => setMinimumSalary(e.target.value)}
+                                                                            style={{
+                                                                                borderTopRightRadius: 0,
+                                                                                borderBottomRightRadius: 0,
+                                                                                borderRight: "none",
+                                                                                borderLeft: "none",
+                                                                                flex: 1,
+                                                                            }}
+                                                                        />
                                     <div style={{
                                         border: "1px solid #D5D7DA",
                                         borderLeft: "none",
@@ -215,9 +216,12 @@ export default function Step1CareerDetails({
                                         PHP
                                     </div>
                                 </div>
-                                {showValidation && !minimumSalary && (
+                                                                {showValidation && !salaryNegotiable && !minimumSalary && (
                                     <span style={{ color: "#EF4444", fontSize: "12px" }}>This is a required field.</span>
                                 )}
+                                                                {salaryNegotiable && (
+                                                                    <span style={{ color: "#667085", fontSize: 12 }}>Range disabled (salary is negotiable).</span>
+                                                                )}
                             </div>
 
                             <div style={{ flex: 1 }}>
@@ -243,14 +247,15 @@ export default function Step1CareerDetails({
                                         className="form-control"
                                         placeholder="0"
                                         min={0}
-                                        value={maximumSalary}
+                                        value={salaryNegotiable ? "" : maximumSalary}
+                                        disabled={salaryNegotiable}
                                         onChange={(e) => setMaximumSalary(e.target.value)}
                                         style={{
-                                        borderTopRightRadius: 0,
-                                        borderBottomRightRadius: 0,
-                                        borderRight: "none",
-                                        borderLeft: "none",
-                                        flex: 1
+                                            borderTopRightRadius: 0,
+                                            borderBottomRightRadius: 0,
+                                            borderRight: "none",
+                                            borderLeft: "none",
+                                            flex: 1,
                                         }}
                                     />
                                     <div style={{
@@ -269,8 +274,11 @@ export default function Step1CareerDetails({
                                         PHP
                                     </div>
                                 </div>
-                                {showValidation && !maximumSalary && (
+                                {showValidation && !salaryNegotiable && !maximumSalary && (
                                     <span style={{ color: "#EF4444", fontSize: "12px" }}>This is a required field.</span>
+                                )}
+                                {salaryNegotiable && (
+                                    <span style={{ color: "#667085", fontSize: 12 }}>Range disabled (salary is negotiable).</span>
                                 )}
                             </div>
 
@@ -279,13 +287,26 @@ export default function Step1CareerDetails({
                                 <input
                                     type="checkbox"
                                     checked={salaryNegotiable}
-                                    onChange={() => setSalaryNegotiable(!salaryNegotiable)}
+                                    onChange={() => {
+                                        const next = !salaryNegotiable;
+                                        setSalaryNegotiable(next);
+                                        if (next) { // turning negotiable ON: clear range
+                                            setMinimumSalary("");
+                                            setMaximumSalary("");
+                                        }
+                                    }}
                                 />
                                 <span className="slider round"></span>
                                 </label>
                                 <span style={{ fontSize: 14, color: "#181D27", fontWeight: 500 }}>Negotiable</span>
                             </div>
                         </div>
+                        {/* Hint describing logic */}
+                        <p style={{ marginTop: 8, fontSize: 12, color: "#667085" }}>
+                          {salaryNegotiable
+                            ? "When negotiable is enabled, salary range is hidden and will be stored as null values."
+                            : "Enter a minimum and maximum salary (PHP). These are required when negotiable is off."}
+                        </p>
                     </div>
                 </div>
             </div>
