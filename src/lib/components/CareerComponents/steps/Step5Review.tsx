@@ -50,8 +50,8 @@ export default function Step5Review(props: Step5ReviewProps) {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 24, maxWidth: 1100, margin: '0 auto', paddingBottom: 40 }}>
-      <h2 style={{ fontSize: 22, fontWeight: 600, color: '#181D27', margin: 0 }}>5. Review & Save</h2>
-      <p style={{ fontSize: 16, color: '#414651', marginTop: 2, marginBottom: 0 }}>Confirm all details before {formType === 'add' ? 'creating' : 'updating'} this career. You can still go back to adjust.</p>
+      <h2 style={{ fontSize: 22, fontWeight: 600, color: '#181D27' }}>5. Review & Save</h2>
+      <p style={{ fontSize: 16, color: '#414651', marginTop:-20}}>Confirm all details before {formType === 'add' ? 'creating' : 'updating'} this career. You can still go back to adjust.</p>
 
       {/* Section: Career Details & Team Access */}
   <CollapsibleCard title="Career Details & Team Access" defaultOpen onEdit={onEditCareerDetails} editAriaLabel="Edit career details and team access">
@@ -403,42 +403,88 @@ export default function Step5Review(props: Step5ReviewProps) {
   );
 }
 
-function CollapsibleCard({ title, children, defaultOpen = true, onEdit, editAriaLabel }: { title: string; children: React.ReactNode; defaultOpen?: boolean; onEdit?: () => void; editAriaLabel?: string }) {
-  const [open, setOpen] = useState(!!defaultOpen);
-  return (
-    <div className="layered-card-outer--solid rounded-2xl border border-[#E9EAEB] p-2" style={{ background: '#F9FAFB' }}>
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '6px 8px 0 8px' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <button
-            type="button"
-            onClick={() => setOpen(v => !v)}
-            aria-label={open ? 'Collapse section' : 'Expand section'}
-            style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: 'transparent', border: 'none', cursor: 'pointer' }}
-          >
-            <i className={`la ${open ? 'la-angle-up' : 'la-angle-down'}`} style={{ fontSize: 18, color: '#667085' }} aria-hidden="true" />
-            <h3 style={{ fontSize: 16, fontWeight: 600, color: '#181D27', margin: 0 }}>{title}</h3>
-          </button>
-        </div>
+function CollapsibleCard({ title, children, defaultOpen = true, onEdit, editAriaLabel }) {
+  const [open, setOpen] = React.useState(!!defaultOpen);
+
+return (
+  <div className="layered-card-outer--solid rounded-2xl border border-[#E9EAEB] p-2" style={{ background: '#F9FAFB' }}>
+    <div
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          padding: '6px 8px 0 8px',
+        }}
+      >
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8, border: 'none' }}>
         <button
           type="button"
-          onClick={onEdit ?? (() => {})}
-          disabled={!onEdit}
-          aria-disabled={!onEdit}
-          aria-label={editAriaLabel || `Edit ${title}`}
-          title={editAriaLabel || `Edit ${title}`}
-          style={{ width: 40, height: 40, borderRadius: '50%', background: '#FFFFFF', border: '1px solid #E9EAEB', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: onEdit ? 'pointer' : 'default', opacity: onEdit ? 1 : 0.7, marginBottom: 5 }}
+          onClick={() => setOpen((v) => !v)}
+          aria-label={open ? 'Collapse section' : 'Expand section'}
+          style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: 8,
+            background: 'transparent',
+            border: 'none',
+            cursor: 'pointer',
+            outline: 'none',
+          }}
         >
-          <i className="las la-pencil-alt text-lg" style={{ color: '#181D27' }} aria-hidden="true"></i>
+          <i
+            className={`la ${open ? 'la-angle-up' : 'la-angle-down'}`}
+            style={{ fontSize: 18, color: '#667085' }}
+            aria-hidden="true"
+          />
+          <h3 style={{ fontSize: 16, fontWeight: 600, color: '#181D27', margin: 0 }}>{title}</h3>
         </button>
       </div>
-      {open && (
-        <div className="layered-card-middle bg-white p-4 mb-2" style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-          {children}
-        </div>
-      )}
+
+      <button
+        type="button"
+        onClick={onEdit ?? (() => {})}
+        disabled={!onEdit}
+        aria-disabled={!onEdit}
+        aria-label={editAriaLabel || `Edit ${title}`}
+        title={editAriaLabel || `Edit ${title}`}
+        style={{
+          width: 40,
+          height: 40,
+          borderRadius: '50%',
+          background: '#FFFFFF',
+          border: '1px solid #E9EAEB',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          cursor: onEdit ? 'pointer' : 'default',
+          opacity: onEdit ? 1 : 0.7,
+          marginBottom: 5,
+        }}
+      >
+        <i className="las la-pencil-alt text-lg" style={{ color: '#181D27' }} aria-hidden="true"></i>
+      </button>
     </div>
-  );
+
+    {/* Smooth expandable content */}
+    <div
+      style={{
+        overflow: 'hidden',
+        maxHeight: open ? 1000 : 0, // adjust to fit content height
+        opacity: open ? 1 : 0,
+        transition: 'max-height 0.4s ease, opacity 0.3s ease',
+      }}
+    >
+      <div
+        className="layered-card-middle bg-white p-4 mb-2"
+        style={{ display: 'flex', flexDirection: 'column', gap: 6 }}
+      >
+        {children}
+      </div>
+    </div>
+  </div>
+);
 }
+
 
 function SubCard({ title, children }: { title: string; children: React.ReactNode }) {
   return (
@@ -591,6 +637,7 @@ function normalizeDescription(input: string): string {
 
 // Helpers for CV Review & Pre-screening render
 function renderScreeningSettingPill(setting?: string) {
+  const displaySetting = setting?.split(' and')[0] || 'Good Fit';
   return (
     <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
       <span style={{
@@ -603,7 +650,7 @@ function renderScreeningSettingPill(setting?: string) {
         fontSize: 12,
         lineHeight: '18px',
         fontWeight: 500,
-      }}>{setting || 'Good Fit'}</span>
+      }}>{displaySetting}</span>
     </span>
   );
 }
