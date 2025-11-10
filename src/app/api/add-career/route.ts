@@ -4,6 +4,62 @@ import { guid } from "@/lib/Utils";
 import { ObjectId } from "mongodb";
 import {deepSanitize, sanitizeRich, isValidObjectId, clampNumber,} from "@/lib/utils/sanitize";
 
+// Lightweight sanitizer specifically for pre-screening questions.
+// Kept inline (instead of in sanitize.ts) to avoid broad refactors; can be extracted later.
+function sanitizePreScreeningQuestions(raw: any): any[] {
+  if (!Array.isArray(raw)) return [];
+  const maxQuestions = 25;
+  const maxOptions = 25;
+  return raw
+    .slice(0, maxQuestions)
+    .map((q) => {
+      if (!q || typeof q !== "object") return null;
+      const id = typeof q.id === "string" ? q.id.slice(0, 120) : "";
+      const key = typeof q.key === "string" ? q.key.slice(0, 120) : id;
+      const title = typeof q.title === "string" ? q.title.trim().slice(0, 200) : "";
+      const type = ["dropdown", "checkboxes", "range", "short", "long"].includes(q.type) ? q.type : "short";
+      const required = true; // All required for now (future toggle possible)
+      let options: any[] | undefined = undefined;
+      if (type === "dropdown" || type === "checkboxes") {
+        if (Array.isArray(q.options)) {
+          options = q.options
+            .slice(0, maxOptions)
+            .map((o: any) => {
+              if (!o || typeof o !== "object") return null;
+              const oid = typeof o.id === "string" ? o.id.slice(0, 80) : "";
+              const label = typeof o.label === "string" ? o.label.trim().slice(0, 120) : "";
+              if (!label) return null;
+              return { id: oid || label.toLowerCase().replace(/\s+/g, "-").slice(0,50), label };
+            })
+            .filter(Boolean);
+        } else {
+          options = [];
+        }
+      }
+      let min = undefined;
+      let max = undefined;
+      let currency = undefined;
+      if (type === "range") {
+        const rawMin = typeof q.min === "string" ? q.min.replace(/[^0-9.,]/g, "") : "";
+        const rawMax = typeof q.max === "string" ? q.max.replace(/[^0-9.,]/g, "") : "";
+        const parsedMin = rawMin ? Number(rawMin.replace(/,/g, "")) : undefined;
+        const parsedMax = rawMax ? Number(rawMax.replace(/,/g, "")) : undefined;
+        if (typeof parsedMin === "number" && !isNaN(parsedMin)) min = parsedMin;
+        if (typeof parsedMax === "number" && !isNaN(parsedMax)) max = parsedMax;
+        if (typeof min === "number" && typeof max === "number" && min > max) {
+          // swap if user inverted
+          const temp = min;
+          min = max;
+          max = temp;
+        }
+        currency = typeof q.currency === "string" ? q.currency.trim().toUpperCase().slice(0, 6) : "PHP";
+      }
+      if (!title) return null; // drop empty
+      return { id, key, title, type, required, ...(options ? { options } : {}), ...(type === "range" ? { min, max, currency } : {}) };
+    })
+    .filter(Boolean);
+}
+
 export async function POST(request: Request) {
   try {
     // Parse raw body
@@ -124,6 +180,7 @@ export async function POST(request: Request) {
       jobTitle,
       description,
       questions: sanitized.questions,
+      preScreeningQuestions: sanitizePreScreeningQuestions(sanitized.preScreeningQuestions),
       location: sanitized.location,
       workSetup: sanitized.workSetup,
       workSetupRemarks:

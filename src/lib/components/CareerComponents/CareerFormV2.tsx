@@ -335,6 +335,8 @@ export default function CareerForm({
       workSetup,
       workSetupRemarks,
       questions,
+      // New: persist recruiter-defined pre-screening questions
+      preScreeningQuestions,
       lastEditedBy: userInfoSlice,
       status,
       updatedAt: Date.now(),
@@ -426,6 +428,8 @@ export default function CareerForm({
         workSetup,
         workSetupRemarks,
         questions,
+        // New: persist recruiter-defined pre-screening questions
+        preScreeningQuestions,
         lastEditedBy: userInfoSlice,
         createdBy: userInfoSlice,
         screeningSetting,
