@@ -198,5 +198,82 @@ Please follow the existing code style and organization when contributing to the 
 ## Troubleshooting
 
 - If you encounter issues with the MongoDB connection, verify your connection string and network access settings.
+
+## Tickets / Implementation Summary
+
+This section documents the changes completed for Tickets 1–3. Ticket 4 (Pre‑screening questions) is intentionally not included yet.
+
+### Ticket 1 — Development environment setup
+
+- Forked/cloned the repository and installed dependencies.
+- Connected external services and verified a working local build.
+- Added explicit environment variables and wiring for the Core API.
+
+Use the following Core API URL provided in the ticket:
+
+```
+NEXT_PUBLIC_CORE_API_URL=https://jia-jvx-1aoebad0e6dd.herokuapp.com
+```
+
+Checklist of required environment variables (see `.env.example`):
+
+```
+OPENAI_API_KEY=your_openai_api_key
+MONGODB_URI=your_mongodb_connection_string
+FIREBASE_SERVICE_ACCOUNT=your_firebase_service_account_json
+NEXT_PUBLIC_CORE_API_URL=https://jia-jvx-1aoebad0e6dd.herokuapp.com
+```
+
+### Ticket 2 — Segmented "Add new career" form (Steps 1–5)
+
+Goal: Convert the career creation flow into a segmented, navigable wizard with a progress header and local draft persistence.
+
+Key files (paths are relative to `src/`):
+
+- `lib/components/CareerComponents/CareerFormV2.tsx` — orchestrates steps, validations, save/publish.
+- `lib/components/CareerComponents/ProgressHeader.tsx` — progress header with error highlighting and partial progress support.
+- `lib/components/CareerComponents/steps/Step1CareerDetails.tsx` — step 1: core job details and access.
+- `lib/components/CareerComponents/steps/Step2CVReview.tsx` — step 2: screening settings (pre‑screening expansion comes with Ticket 4).
+- `lib/components/CareerComponents/steps/Step3AI_Interview.tsx` — step 3: AI interview categories and questions.
+- `lib/components/CareerComponents/steps/Step4Pipeline.tsx` — step 4: static pipeline overview.
+- `lib/components/CareerComponents/steps/Step5Review.tsx` — step 5: final review with publish and draft actions.
+- `lib/hooks/useAutoSaveDraft.ts` — debounced auto‑save hook.
+- `lib/utils/draftStorage.ts` — helpers to load/save/clear drafts in localStorage.
+
+What the user can do now:
+
+- Navigate among steps 1–5 with clear progress feedback.
+- Leave the page and come back later; progress is auto‑saved locally and restored.
+- Save a draft explicitly from step 5 and continue editing later.
+
+Notes:
+
+- Drafts are stored client‑side under keys like `careerDraft:new` or `careerDraft:<id>`.
+- To clear a draft manually, remove keys that start with `careerDraft:` from your browser’s localStorage.
+
+### Ticket 3 — Input sanitization against XSS
+
+Objective: Prevent malicious HTML/JS from being stored or rendered while still allowing safe formatting in rich text fields.
+
+Key files:
+
+- `lib/utils/sanitize.ts` — exposes `sanitizeStrict`, `sanitizeRich`, and `deepSanitize` utilities.
+- `app/api/add-career/route.ts` — sanitizes incoming payload before insert.
+- `app/api/update-career/route.tsx` — sanitizes incoming payload before update.
+
+Highlights:
+
+- Server‑side sanitization is performed before persisting data.
+- Plain text fields (e.g., job title, location) are stripped of HTML.
+- Rich text fields (e.g., description) allow a minimal safe subset of tags; links are transformed to safe attributes.
+- Deep sanitization ensures nested fields are also cleaned.
+- Numeric fields are clamped to safe ranges; length limits reduce payload abuse.
+
+## Draft auto‑save and resume (Careers form)
+
+- The segmented "Add new career" form auto‑saves progress to localStorage under a draft key (for example, `careerDraft:new`).
+- Progress, including the current step and per‑step inputs like interview questions, is restored automatically when you return.
+- To clear a draft manually, clear site data for this origin in your browser or remove the `careerDraft:*` keys in localStorage.
+- For privacy, avoid storing sensitive information in drafts on shared machines.
 - For Firebase authentication problems, check your Firebase service account credentials.
 - For development issues, try running `npm run clean` followed by `npm install` and `npm run dev`.
