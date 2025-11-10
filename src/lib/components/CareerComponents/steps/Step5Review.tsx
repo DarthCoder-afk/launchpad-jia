@@ -51,7 +51,7 @@ export default function Step5Review(props: Step5ReviewProps) {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 24, maxWidth: 1100, margin: '0 auto', paddingBottom: 40 }}>
       <h2 style={{ fontSize: 22, fontWeight: 600, color: '#181D27', margin: 0 }}>5. Review & Save</h2>
-      <p style={{ fontSize: 14, color: '#414651', marginTop: -8 }}>Confirm all details before {formType === 'add' ? 'creating' : 'updating'} this career. You can still go back to adjust.</p>
+      <p style={{ fontSize: 16, color: '#414651', marginTop: 2, marginBottom: 0 }}>Confirm all details before {formType === 'add' ? 'creating' : 'updating'} this career. You can still go back to adjust.</p>
 
       {/* Section: Career Details & Team Access */}
   <CollapsibleCard title="Career Details & Team Access" defaultOpen onEdit={onEditCareerDetails} editAriaLabel="Edit career details and team access">
@@ -197,7 +197,7 @@ export default function Step5Review(props: Step5ReviewProps) {
             <ol style={{ fontSize: 13, margin: 0, paddingLeft: 20, display: 'flex', flexDirection: 'column', gap: 14 }}>
               {preScreeningQuestions.map((q, idx) => (
                 <li key={String(q.id ?? idx)} style={{ color: '#181D27' }}>
-                  <div style={{ marginBottom: 6 }}>{q.title || q.key || 'Untitled question'}</div>
+                  <div style={{ marginBottom: 6 }}>{(q.title && String(q.title).trim()) || 'Untitled question'}</div>
                   {renderQuestionDetails(q)}
                 </li>
               ))}
@@ -409,49 +409,76 @@ function Avatar({ name, image }: { name?: string; image?: string }) {
   );
 }
 
-// Normalize/sanitize HTML-ish job description to readable plain text
 function normalizeDescription(input: string): string {
   if (!input) return '';
   try {
-    // Remove leading label if present
+    // 🧹 Step 1: Clean up HTML and boilerplate labels
     let s = input.replace(/^\s*Job\s*Description\s*:*/i, '');
-    // Normalize common HTML breaks/containers to newlines
     s = s.replace(/<br\s*\/?>/gi, '\n');
     s = s.replace(/<\/(div|p)>/gi, '\n');
-    // Strip remaining tags
     s = s.replace(/<[^>]+>/g, '');
-    // Remove any standalone 'Job Description:' lines leftover
     s = s.replace(/(^|[\r\n])\s*Job\s*Description\s*:?\s*(?=\r?\n|$)/gi, '$1');
-    // Convert key sections into bullet lists
+
     const lines = s.split(/\r?\n/);
     const out: string[] = [];
-    const bulletHeadings = new Set(['responsibilities', 'responsibility', 'qualifications', 'qualification']);
+
+    // 🧩 Define all recognized headings that should start bullet sections
+    const bulletHeadings = new Set([
+      'responsibilities',
+      'responsibility',
+      'qualifications',
+      'qualification',
+      'requirements',
+      'requirement',
+      'skills',
+      'duties',
+      'tasks',
+      'expectations',
+    ]);
+
     let inBulletSection = false;
+
+    // 🧠 Step 2: Process each line
     for (let i = 0; i < lines.length; i++) {
       const raw = lines[i];
       const trimmed = raw.trim();
+      if (!trimmed) {
+        out.push('');
+        continue;
+      }
+
+      // Detect headings like "Responsibilities:" or "Skills"
       const headingMatch = trimmed.match(/^([A-Za-z][A-Za-z &/()\-]{2,})\s*:?\s*$/);
       if (headingMatch) {
         const headingKey = headingMatch[1].toLowerCase();
         if (bulletHeadings.has(headingKey)) {
-          out.push(`${headingMatch[1]}:`);
+          // 🧩 Add one line before heading for readability
           out.push('');
+          out.push(`${headingMatch[1]}:`);
           inBulletSection = true;
           continue;
         } else {
+          // Not a recognized heading, just reset bullet mode
           inBulletSection = false;
         }
       }
-      if (trimmed.length === 0) {
-        out.push('');
-        // Do not exit bullet section on blank lines; keep collecting until next heading
-        continue;
-      }
+
       if (inBulletSection) {
-        const bulletText = trimmed.replace(/^(?:[-*•]\s*)/, '');
-        out.push(`• ${bulletText}`);
+        // 🟢 Convert paragraph into bullet points
+        const alreadyBulleted = /^(?:[-*•]\s+)/.test(trimmed);
+        const base = alreadyBulleted ? trimmed.replace(/^(?:[-*•]\s+)/, '') : trimmed;
+        const sentences = base
+          .split(/(?<=[.!?][)"'”]?)\s*(?=[A-Z0-9])/)
+          .map((t) => t.trim())
+          .filter((t) => t.length > 0);
+
+        if (sentences.length > 1) {
+          sentences.forEach((sPart) => out.push(`• ${sPart.replace(/^(?:[-*•]\s*)/, '')}`));
+        } else {
+          out.push(`• ${base}`);
+        }
       } else {
-        // Normalize ad-hoc bullets even outside known sections
+        // Non-bullet sections — keep plain or convert existing bullets
         if (/^(?:[-*•]\s+)/.test(trimmed)) {
           out.push(`• ${trimmed.replace(/^(?:[-*•]\s*)/, '')}`);
         } else {
@@ -459,14 +486,26 @@ function normalizeDescription(input: string): string {
         }
       }
     }
+
+    // 🧹 Step 3: Clean and normalize final text
     let formatted = out.join('\n');
-    // Collapse excessive blank lines and trim
+
+    // Remove extra line after any recognized heading (e.g., "Responsibilities:\n\n•" → "Responsibilities:\n•")
+    bulletHeadings.forEach((h) => {
+      const regex = new RegExp(`(${h}s?:)\\n\\n`, 'gi');
+      formatted = formatted.replace(regex, '$1\n');
+    });
+
+    // Collapse excessive blank lines
     formatted = formatted.replace(/\n{3,}/g, '\n\n').trim();
+
     return formatted;
   } catch {
     return input;
   }
 }
+
+
 
 // Helpers for CV Review & Pre-screening render
 function renderScreeningSettingPill(setting?: string) {
@@ -497,7 +536,7 @@ function splitPrompt(prompt: string): string[] {
   // If it's a single long paragraph, try to split by sentences
   if (lines.length <= 1) {
     return prompt
-      .split(/(?<=[.!?])\s+(?=[A-Z0-9])/)
+      .split(/(?<=[.!?][)"'”]?)\s*(?=[A-Z0-9])/)
       .map((s) => s.trim())
       .filter(Boolean);
   }
