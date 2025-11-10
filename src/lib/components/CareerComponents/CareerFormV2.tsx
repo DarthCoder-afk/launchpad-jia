@@ -75,6 +75,22 @@ export default function CareerForm({
   >(undefined);
   const totalSteps = 5;
 
+  // Count of saved (non-editing, non-empty) AI interview questions
+  const savedAIQuestionCount = useMemo(() => {
+    if (!step3Categories || !Array.isArray(step3Categories)) return 0;
+    return step3Categories.reduce(
+      (sum, c) =>
+        sum +
+        (Array.isArray(c.questions)
+          ? c.questions.filter(
+              (q: any) =>
+                q && q.editing === false && q.text && String(q.text).trim().length > 0
+            ).length
+          : 0),
+      0
+    );
+  }, [step3Categories]);
+
   const [errorSteps, setErrorSteps] = useState<number[]>([]);
   const handleNext = () => setStep((prev) => Math.min(prev + 1, totalSteps));
   const handlePrev = () => setStep((prev) => Math.max(prev - 1, 1));
@@ -875,6 +891,10 @@ export default function CareerForm({
               hasProvince &&
               hasCity
             );
+          }
+          // Show half progress from Step 3 toward Step 4 when >=5 AI interview questions are saved
+          if (step === 3) {
+            return savedAIQuestionCount >= 5;
           }
           return false;
         })()}
