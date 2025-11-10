@@ -1,13 +1,14 @@
 "use client";
 
 interface ProgressHeaderProps {
-  step: number;              // current active step (1-indexed)
-  totalSteps: number;        // total number of steps
-  currentStepPartial?: boolean; // when true, show the connector to the next step as half-filled
-  forceStep2Half?: boolean;     // always render 50% progress between step 2 and 3 (optional-heavy step)
+  step: number;                  // current active step (1-indexed)
+  totalSteps: number;            // total number of steps
+  currentStepPartial?: boolean;  // when true, show the connector to the next step as half-filled
+  forceStep2Half?: boolean;      // always render 50% progress between step 2 and 3 (optional-heavy step)
+  errorSteps?: number[];         // list of step numbers currently in error state (e.g. validation after attempt)
 }
 
-export default function ProgressHeader({ step, totalSteps, currentStepPartial, forceStep2Half }: ProgressHeaderProps) {
+export default function ProgressHeader({ step, totalSteps, currentStepPartial, forceStep2Half, errorSteps = [] }: ProgressHeaderProps) {
   const steps = [
     "Career Details & Team Access",
     "CV Review & Pre-screening",
@@ -24,6 +25,7 @@ export default function ProgressHeader({ step, totalSteps, currentStepPartial, f
           const isActive = step === stepNumber;
           const isCompleted = step > stepNumber; // user already moved past this step
           const isLast = index === steps.length - 1;
+          const isError = errorSteps.includes(stepNumber);
 
             // Connector progress logic (line leading out to next step)
           // States:
@@ -55,40 +57,52 @@ export default function ProgressHeader({ step, totalSteps, currentStepPartial, f
                 minWidth: "100px",
               }}
             >
-              {/* Outer / Inner Circle */}
-              <div
-                style={{
-                  width: 20,
-                  height: 20,
-                  borderRadius: "50%",
-                  backgroundColor: isActive ? "#FFFFFF" : isCompleted ? "#000000" : "#E5E7EB",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  position: "relative",
-                  border: isActive || isCompleted ? "2px solid #000000" : "2px solid #E5E7EB",
-                  zIndex: 2,
-                  flexShrink: 0,
-                  transition: "border-color 0.25s ease, background-color 0.25s ease",
-                }}
-                className="md:w-6 md:h-6"
-                >
-                  {isCompleted ? (
-                    <img src="/icons/checkV3.svg" alt="checkmark"
-                    width={20}
-                    height={20} />
-                  ) : null}
+              {/* Status Circle / Error Icon */}
+              {isError ? (
+                <i
+                  className="las la-exclamation-triangle"
+                  style={{ color: "#EF4444", fontSize: 25, fontWeight: "bold", zIndex: 2, backgroundColor: "#FFFFFF", }}
+                  aria-hidden="true"
+                />
+              
+              ) : (
                 <div
                   style={{
-                    width: 6,
-                    height: 6,
+                    width: 20,
+                    height: 20,
                     borderRadius: "50%",
-                    backgroundColor: isActive || isCompleted ? "#181D27" : "#E5E7EB",
-                    transition: "background-color 0.25s ease",
+                    backgroundColor: isActive ? "#FFFFFF" : isCompleted ? "#000000" : "#E5E7EB",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    position: "relative",
+                    border: isActive || isCompleted ? "2px solid #000000" : "2px solid #E5E7EB",
+                    zIndex: 2,
+                    flexShrink: 0,
+                    transition: "border-color 0.25s ease, background-color 0.25s ease",
                   }}
-                  className="md:w-2 md:h-2"
-                />
-              </div>
+                  className="md:w-6 md:h-6"
+                >
+                  {isCompleted ? (
+                    <img
+                      src="/icons/checkV3.svg"
+                      alt="checkmark"
+                      width={20}
+                      height={20}
+                    />
+                  ) : null}
+                  <div
+                    style={{
+                      width: 6,
+                      height: 6,
+                      borderRadius: "50%",
+                      backgroundColor: isActive || isCompleted ? "#181D27" : "#E5E7EB",
+                      transition: "background-color 0.25s ease",
+                    }}
+                    className="md:w-2 md:h-2"
+                  />
+                </div>
+              )}
 
               {/* Connector (background + progress overlay) */}
               {!isLast && (

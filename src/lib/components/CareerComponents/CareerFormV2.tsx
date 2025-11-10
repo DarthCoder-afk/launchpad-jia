@@ -75,6 +75,7 @@ export default function CareerForm({
   >(undefined);
   const totalSteps = 5;
 
+  const [errorSteps, setErrorSteps] = useState<number[]>([]);
   const handleNext = () => setStep((prev) => Math.min(prev + 1, totalSteps));
   const handlePrev = () => setStep((prev) => Math.max(prev - 1, 1));
 
@@ -236,6 +237,28 @@ export default function CareerForm({
       workSetup?.trim().length > 0
     );
   };
+
+  // Auto-clear Step 1 error icon only when Step 1 becomes fully valid
+  useEffect(() => {
+    const hasJobTitle = jobTitle?.trim().length > 0;
+    const hasDescription = description?.trim().length > 0;
+    const hasEmploymentType = employmentType?.trim().length > 0;
+    const hasWorkSetup = workSetup?.trim().length > 0;
+    const hasProvince = province && province !== "Choose Province";
+    const hasCity = city?.trim().length > 0;
+
+    const step1Valid =
+      hasJobTitle &&
+      hasDescription &&
+      hasEmploymentType &&
+      hasWorkSetup &&
+      hasProvince &&
+      hasCity;
+
+    if (step1Valid) {
+      setErrorSteps((prev) => prev.filter((s) => s !== 1));
+    }
+  }, [jobTitle, description, employmentType, workSetup, province, city]);
 
   const updateCareer = async (status: string) => {
     if (
@@ -418,6 +441,10 @@ export default function CareerForm({
     }
     if (!isFormValid()) {
       setShowValidation(true); // trigger red borders + validation messages
+      // Persist icon for Step 1 on any invalid state (partial or all empty)
+      if (step === 1) {
+        setErrorSteps((prev) => Array.from(new Set([...prev, 1])));
+      }
       const invalidFields = document.querySelectorAll(".form-control");
       invalidFields.forEach((field) => {
         const inputField = field as HTMLInputElement;
@@ -429,6 +456,8 @@ export default function CareerForm({
       });
       return;
     }
+    // Clear error for current step when becomes valid
+    setErrorSteps((prev) => prev.filter((s) => s !== step));
     // Advance to next step (review can handle final save logic later)
     handleNext();
   };
@@ -775,6 +804,10 @@ export default function CareerForm({
                 // For earlier steps, enforce required fields and advance
                 if (!isFormValid()) {
                   setShowValidation(true);
+                  // Persist icon for Step 1 on any invalid state (partial or all empty)
+                  if (step === 1) {
+                    setErrorSteps((prev) => Array.from(new Set([...prev, 1])));
+                  }
                   const invalidFields =
                     document.querySelectorAll(".form-control");
                   invalidFields.forEach((field) => {
@@ -831,6 +864,7 @@ export default function CareerForm({
         forceStep2Half={
           step === 2
         } /* show half connector toward step 3 only when exactly on step 2 */
+        errorSteps={errorSteps}
       />
       {/* Separator */}
       <div
