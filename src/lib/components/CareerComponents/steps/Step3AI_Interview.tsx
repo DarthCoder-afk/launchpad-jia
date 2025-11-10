@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useImperativeHandle, useMemo, useState, forwardRef } from "react";
+import { useEffect, useImperativeHandle, useMemo, useState, forwardRef, useRef } from "react";
+import type React from "react";
 import CustomDropdown from "@/lib/components/CareerComponents/CustomDropdown";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -53,6 +54,8 @@ const Step3AI_Interview = forwardRef<Step3InterviewRef, Step3Props>(
 	const [loadingAll, setLoadingAll] = useState(false);
 	const [loadingIdx, setLoadingIdx] = useState<number | null>(null);
 	const [showMinError, setShowMinError] = useState(false);
+	// Drag-and-drop tracking for question reordering
+	const draggingRef = useRef<{ catIdx: number; qIdx: number } | null>(null);
 		// Hydrate from parent if provided; else default empty categories
 		const defaultCategories: Category[] = [
 			{ label: "CV Validation / Experience", questions: [], askCount: 2, showAskCount: false },
@@ -220,6 +223,71 @@ const Step3AI_Interview = forwardRef<Step3InterviewRef, Step3Props>(
 		setEditing(index, qIndex, false);
 	}
 
+	// --- Drag and Drop Handlers ---
+	function handleDragStart(catIdx: number, qIdx: number, e: React.DragEvent<HTMLDivElement>) {
+		draggingRef.current = { catIdx, qIdx };
+		try {
+			e.dataTransfer.effectAllowed = "move";
+			e.dataTransfer.setData("text/plain", "drag-question");
+		} catch {}
+	}
+
+	function handleDragOver(_catIdx: number, _qIdx: number, e: React.DragEvent<HTMLDivElement>) {
+		e.preventDefault();
+		try {
+			e.dataTransfer.dropEffect = "move";
+		} catch {}
+	}
+
+	function handleDrop(targetCatIdx: number, targetQIdx: number, e: React.DragEvent<HTMLDivElement>) {
+		e.preventDefault();
+		const from = draggingRef.current;
+		if (!from) return;
+		setCategories((prev) => {
+			const copy = [...prev];
+			if (!copy[from.catIdx] || !copy[targetCatIdx]) return prev;
+			if (!Array.isArray(copy[from.catIdx].questions) || !Array.isArray(copy[targetCatIdx].questions)) return prev;
+			if (from.catIdx === targetCatIdx) {
+				const qs = [...copy[targetCatIdx].questions];
+				const [moved] = qs.splice(from.qIdx, 1);
+				let insertAt = targetQIdx;
+				if (from.qIdx < targetQIdx) insertAt = Math.max(0, insertAt - 1);
+				qs.splice(insertAt, 0, moved);
+				copy[targetCatIdx] = { ...copy[targetCatIdx], questions: qs };
+				return copy;
+			}
+			const fromQs = [...copy[from.catIdx].questions];
+			const [moved] = fromQs.splice(from.qIdx, 1);
+			const toQs = [...copy[targetCatIdx].questions];
+			toQs.splice(targetQIdx, 0, moved);
+			copy[from.catIdx] = { ...copy[from.catIdx], questions: fromQs };
+			copy[targetCatIdx] = { ...copy[targetCatIdx], questions: toQs };
+			return copy;
+		});
+		draggingRef.current = null;
+	}
+
+	function handleDropOnEmpty(targetCatIdx: number, e: React.DragEvent<HTMLDivElement>) {
+		e.preventDefault();
+		const from = draggingRef.current;
+		if (!from) return;
+		setCategories((prev) => {
+			const copy = [...prev];
+			if (!copy[from.catIdx] || !copy[targetCatIdx]) return prev;
+			const fromQs = [...copy[from.catIdx].questions];
+			const [moved] = fromQs.splice(from.qIdx, 1);
+			const toQs = [...copy[targetCatIdx].questions, moved];
+			copy[from.catIdx] = { ...copy[from.catIdx], questions: fromQs };
+			copy[targetCatIdx] = { ...copy[targetCatIdx], questions: toQs };
+			return copy;
+		});
+		draggingRef.current = null;
+	}
+
+	function handleDragEnd() {
+		draggingRef.current = null;
+	}
+
 	return (
 		<div
 			style={{
@@ -336,7 +404,7 @@ const Step3AI_Interview = forwardRef<Step3InterviewRef, Step3Props>(
 				</div>
 
 				{/* 2. AI Interview Questions */}
-				<div className="layered-card-outer--solid rounded-2xl border border-[#E9EAEB] p-2">
+				<div className="layered-card-outer--solid rounded-2xl border border-[#E9EAEB] p-2 mb-5">
 					<div
 						className="flex w-full flex-nowrap items-center justify-between gap-3 px-4 py-3"
 						style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "nowrap", gap: 12 }}
@@ -347,7 +415,6 @@ const Step3AI_Interview = forwardRef<Step3InterviewRef, Step3Props>(
                         >
                             <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                                 2. AI Interview Questions
-                                <span className="text-[#667085] font-normal" style={{ fontWeight: 400 }}> (optional)</span>
                             </span>
                             <span
                                 className="inline-block align-middle ml-2"
@@ -429,10 +496,18 @@ const Step3AI_Interview = forwardRef<Step3InterviewRef, Step3Props>(
 									{cat.questions.length > 0 && (
 										<div style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: 10 }}>
 											{cat.questions.map((q, qIdx) => (
-												<div key={`${cat.label}-${qIdx}`} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', border: '1px solid #E9EAEB', background: '#FFFFFF', borderRadius: 12, padding: '10px 12px' }}>
+												<div
+													key={`${cat.label}-${qIdx}`}
+													style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', border: '1px solid #E9EAEB', background: '#FFFFFF', borderRadius: 12, padding: '10px 12px' }}
+													draggable
+													onDragStart={(e) => handleDragStart(idx, qIdx, e)}
+													onDragOver={(e) => handleDragOver(idx, qIdx, e)}
+													onDrop={(e) => handleDrop(idx, qIdx, e)}
+													onDragEnd={handleDragEnd}
+												>
 													<div style={{ display: 'flex', alignItems: 'center', gap: 10, flex: 1 }}>
-														<div title="Drag to reorder" style={{ width: 28, height: 28, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', borderRadius: 8, border: '1px solid #E2E4E8', background: '#FFFFFF', color: '#667085' }}>
-															<i className="la la-ellipsis-v" aria-hidden="true"></i>
+														<div title="Drag to reorder" style={{ width: 28, height: 28, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', borderRadius: 8,  background: '#FFFFFF', color: '#667085', cursor: 'grab' }}>
+															<i className="las la-braille" aria-hidden="true"></i>
 														</div>
 														<input
 															type="text"
@@ -444,22 +519,38 @@ const Step3AI_Interview = forwardRef<Step3InterviewRef, Step3Props>(
 													</div>
 													<div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
 														{q.editing ? (
-															<button type="button" onClick={() => saveQuestion(idx, qIdx)} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '6px 10px', borderRadius: 999, border: '1px solid #181D27', background: '#181D27', color: '#FFFFFF', fontSize: 13 }}>
-																<i className="la la-save" aria-hidden="true"></i>
+															<button type="button" onClick={() => saveQuestion(idx, qIdx)} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '8px 12px', borderRadius: 999, border: '1px solid #181D27', background: '#181D27', color: '#FFFFFF', fontSize: 13, cursor: 'pointer' }}>
+																<i className="la la-save text-lg" aria-hidden="true"></i>
 																Save
 															</button>
 														) : (
-															<button type="button" onClick={() => setEditing(idx, qIdx, true)} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '6px 10px', borderRadius: 999, border: '1px solid #E9EAEB', background: '#FFFFFF', color: '#181D27', fontSize: 13 }}>
-																<i className="la la-pencil" aria-hidden="true"></i>
+															<button type="button" onClick={() => setEditing(idx, qIdx, true)} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '8px 12px', borderRadius: 999, border: '1px solid #E9EAEB', background: '#FFFFFF', color: '#181D27', fontSize: 13, cursor: 'pointer' }}>
+																<i className="la la-pencil text-lg" aria-hidden="true"></i>
 																Edit
 															</button>
 														)}
-														<button type="button" title="Delete" onClick={() => deleteQuestion(idx, qIdx)} style={{ width: 32, height: 32, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', borderRadius: 999, border: '1px solid #FEE4E2', background: '#FFF7F7', color: '#EF4444' }}>
-															<i className="la la-trash" aria-hidden="true"></i>
+														<button type="button" title="Delete" onClick={() => deleteQuestion(idx, qIdx)} style={{ width: 32, height: 32, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', borderRadius: 999, border: '1px solid #FEE4E2', background: '#FFF7F7', color: '#EF4444', cursor: 'pointer' }}>
+															<i className="la la-trash text-lg" aria-hidden="true"></i>
 														</button>
 													</div>
 												</div>
 											))}
+										</div>
+									)}
+									{cat.questions.length === 0 && (
+										<div
+											style={{
+												width: '100%',
+												border: '1px dashed #D5D7DA',
+												borderRadius: 12,
+												padding: '12px',
+												color: '#667085',
+												textAlign: 'center',
+											}}
+											onDragOver={(e) => handleDragOver(idx, 0, e)}
+											onDrop={(e) => handleDropOnEmpty(idx, e)}
+										>
+											Drag questions here
 										</div>
 									)}
                                     <div style={{ width: '100%', display: "flex", alignItems: "center", justifyContent: 'space-between', gap: 12 }}>
