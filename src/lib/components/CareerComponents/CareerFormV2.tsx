@@ -437,7 +437,11 @@ export default function CareerForm({
   const handleSaveAndContinue = async () => {
     if (step === 3) {
       const ok = step3Ref.current?.validateQuestions() ?? false;
-      if (!ok) return;
+      if (!ok) {
+        // Persist error icon for Step 3 when user tries to proceed without enough saved questions
+        setErrorSteps((prev) => Array.from(new Set([...prev, 3])));
+        return;
+      }
     }
     if (!isFormValid()) {
       setShowValidation(true); // trigger red borders + validation messages
@@ -461,6 +465,19 @@ export default function CareerForm({
     // Advance to next step (review can handle final save logic later)
     handleNext();
   };
+
+  // Auto-clear Step 3 error icon only when it becomes fully valid (>=5 saved, non-empty questions)
+  useEffect(() => {
+    if (!step3Categories || !Array.isArray(step3Categories)) return;
+    const savedValid = step3Categories.reduce((sum, c) =>
+      sum + (Array.isArray(c.questions)
+        ? c.questions.filter((q: any) => q && q.editing === false && q.text && String(q.text).trim().length > 0).length
+        : 0),
+    0);
+    if (savedValid >= 5) {
+      setErrorSteps((prev) => prev.filter((s) => s !== 3));
+    }
+  }, [step3Categories]);
 
   useEffect(() => {
     const parseProvinces = () => {
