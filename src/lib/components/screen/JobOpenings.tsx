@@ -351,10 +351,29 @@ export default function () {
       });
   }
 
+  //Forwards an orgID from the Page URL to the API
   async function getCareers() {
+    // Prefer explicit org from URL; if missing, try activeOrg from localStorage (recruiter login)
+    const qsOrgID = searchParams.get("orgID");
+    let derivedOrgID: string | null = qsOrgID;
+    if (!derivedOrgID && typeof window !== "undefined") {
+      try {
+        const activeOrg = localStorage.getItem("activeOrg");
+        if (activeOrg) {
+          const parsed = JSON.parse(activeOrg);
+          if (parsed && typeof parsed._id === "string") {
+            derivedOrgID = parsed._id;
+          }
+        }
+      } catch {}
+    }
+
+    const url = derivedOrgID
+      ? `/api/whitecloak/get-careers?orgID=${encodeURIComponent(derivedOrgID)}`
+      : `/api/whitecloak/get-careers?all=true`;
     await axios({
       method: "GET",
-      url: "/api/whitecloak/get-careers",
+      url,
     })
       .then(async (res) => {
         const result = await res.data;

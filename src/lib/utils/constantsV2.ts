@@ -1,5 +1,6 @@
 const originPath = "/";
-const jobOpeningsOriginPath = "/job-openings";
+// Public job openings live under the Whitecloak namespace in this app
+const jobOpeningsOriginPath = "/whitecloak/job-openings";
 const dashboardOriginPath = "/dashboard";
 
 export const pathConstants = {
@@ -9,7 +10,8 @@ export const pathConstants = {
   home: originPath,
   jobOpenings: jobOpeningsOriginPath,
   dashboard: dashboardOriginPath,
-  dashboardJobOpenings: dashboardOriginPath + "/job-openings",
+  // Applicant (mobile) job openings live under whitecloak/applicant
+  dashboardJobOpenings: "/whitecloak/applicant/job-openings",
   manageCV: dashboardOriginPath + "/manage-cv",
   uploadCV: dashboardOriginPath + "/upload-cv",
 };
