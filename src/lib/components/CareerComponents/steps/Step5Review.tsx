@@ -350,7 +350,7 @@ export default function Step5Review(props: Step5ReviewProps) {
 
           {/* Row: Interview Questions (heading with inline count pill) */}
           <div style={{ marginBottom: 8, display: 'flex', alignItems: 'center', gap: 8 }}>
-            <div style={{ fontSize: 13, fontWeight: 600, color: '#181D27' }}>Interview Questions</div>
+            <div style={{ fontSize: 14, fontWeight: 600, color: '#111827', marginBottom: 8 }}>Interview Questions</div>
             <span
               aria-label="Interview questions count"
               style={{ fontSize: 11, lineHeight: '16px', padding: '1px 6px', borderRadius: 999, border: '1px solid #D5D7DA', background: '#FFFFFF', color: '#181D27', fontWeight: 500 }}>
@@ -367,7 +367,7 @@ export default function Step5Review(props: Step5ReviewProps) {
                 interviewCategories!.forEach(cat => {
                   if (cat.questions.length === 0) return;
                   items.push(
-                    <div key={`heading-${cat.label}`} style={{ fontSize: 14, fontWeight: 600, color: '#667085',  letterSpacing: 0.3 }}>{cat.label}</div>
+                    <div key={`heading-${cat.label}`} style={{ fontSize: 12, color: '#111827', fontWeight: 600, letterSpacing: 0.3 }}>{cat.label}</div>
                   );
                   cat.questions.forEach(q => {
                     items.push(
@@ -426,9 +426,9 @@ function CollapsibleCard({ title, children, defaultOpen = true, onEdit, editAria
           aria-disabled={!onEdit}
           aria-label={editAriaLabel || `Edit ${title}`}
           title={editAriaLabel || `Edit ${title}`}
-          style={{ width: 32, height: 32, borderRadius: '50%', background: '#FFFFFF', border: '1px solid #E9EAEB', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: onEdit ? 'pointer' : 'default', opacity: onEdit ? 1 : 0.7 }}
+          style={{ width: 40, height: 40, borderRadius: '50%', background: '#FFFFFF', border: '1px solid #E9EAEB', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: onEdit ? 'pointer' : 'default', opacity: onEdit ? 1 : 0.7, marginBottom: 5 }}
         >
-          <i className="la la-edit" style={{ fontSize: 16, color: '#181D27' }} aria-hidden="true"></i>
+          <i className="las la-pencil-alt text-lg" style={{ color: '#181D27' }} aria-hidden="true"></i>
         </button>
       </div>
       {open && (
@@ -468,8 +468,8 @@ function Empty({ value }: { value: string }) {
 function Field({ label, value }: { label: React.ReactNode; value: React.ReactNode }) {
   return (
     <div>
-      <div style={{ fontSize: 14, color: '#667085', marginBottom: 4 }}>{label}</div>
-      <div style={{ fontSize: 15, color: '#111827' }}>{value}</div>
+      <div style={{ fontSize: 14, color: '#111827', marginBottom: 4, fontWeight: 600 }}>{label}</div>
+      <div style={{ fontSize: 15, color: '#161f33ff' }}>{value}</div>
     </div>
   );
 }
