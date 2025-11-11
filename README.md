@@ -269,11 +269,4 @@ Highlights:
 - Deep sanitization ensures nested fields are also cleaned.
 - Numeric fields are clamped to safe ranges; length limits reduce payload abuse.
 
-## Draft auto‑save and resume (Careers form)
-
-- The segmented "Add new career" form auto‑saves progress to localStorage under a draft key (for example, `careerDraft:new`).
-- Progress, including the current step and per‑step inputs like interview questions, is restored automatically when you return.
-- To clear a draft manually, clear site data for this origin in your browser or remove the `careerDraft:*` keys in localStorage.
-- For privacy, avoid storing sensitive information in drafts on shared machines.
-- For Firebase authentication problems, check your Firebase service account credentials.
 - For development issues, try running `npm run clean` followed by `npm install` and `npm run dev`.
