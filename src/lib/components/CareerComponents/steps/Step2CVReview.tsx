@@ -522,7 +522,7 @@ export default function Step2CVReview({
 															</button>
 														</div>
 													))}
-													<button onClick={() => addOption(q.id)} style={{ display: "inline-flex", alignItems: "center", gap: 8, padding: 0, border: "none", background: "transparent", color: "#181D27", fontWeight: 500, fontSize: 14, marginTop: 2, cursor: "pointer"   }}>
+													<button onClick={() => addOption(q.id)} style={{ display: "inline-flex", alignItems: "center", gap: 8, padding: 0, border: "none", background: "transparent", color: "#181D27", fontWeight: 500, fontSize: 14, marginTop: 2, cursor: "pointer", outline: "none" }}>
 														<span style={{ fontSize: 18, lineHeight: 1 }}>+</span> Add Option
 													</button>
 
