@@ -3,6 +3,7 @@
 import { useEffect, useImperativeHandle, useMemo, useState, forwardRef, useRef } from "react";
 import type React from "react";
 import CustomDropdown from "@/lib/components/CareerComponents/CustomDropdown";
+import SecretPromptInfo from "@/lib/components/CareerComponents/SecretPromptInfo";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
@@ -372,11 +373,7 @@ const Step3AI_Interview = forwardRef<Step3InterviewRef, Step3Props>(
 													</span>
 													AI Interview Secret Prompt <span className="text-[#667085]" style={{ fontWeight: 400 }}>(optional)</span>
 												</h3>
-												<i
-													className="la la-question-circle"
-													style={{ fontSize: 16, color: "#667085", cursor: "default" }}
-													title="Secret Prompts help refine Jia's evaluation against role-specific nuances."
-												></i>
+												<SecretPromptInfo />
 											</div>
 											<p className="text-sm text-[#666666] mb-3" style={{ lineHeight: 1.5 }}>
 												Secret Prompts give you extra control over Jia's evaluation style, complementing her accurate

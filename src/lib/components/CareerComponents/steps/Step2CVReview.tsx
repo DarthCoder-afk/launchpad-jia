@@ -2,6 +2,7 @@
 
 import CustomDropdown from "@/lib/components/CareerComponents/CustomDropdown";
 import { useState } from "react";
+import SecretPromptInfo from "@/lib/components/CareerComponents/SecretPromptInfo";
 
 type DropdownQuestion = {
 	id: string;
@@ -70,6 +71,7 @@ const defaultSuggested = [
 function uid(prefix = "id") {
 	return `${prefix}_${Math.random().toString(36).slice(2, 8)}_${Date.now().toString(36).slice(-4)}`;
 }
+
 
 export default function Step2CVReview({
 	screeningSetting = "Good Fit and above",
@@ -288,11 +290,7 @@ export default function Step2CVReview({
                                         />
                                     </span> CV Secret Prompt <span className="text-[#667085]" style={{ fontWeight: 400 }}>(optional)</span>
 								</h3>
-								<i
-									className="la la-question-circle"
-									style={{ fontSize: 16, color: "#667085", cursor: "pointer" }}
-									title="Secret Prompts help refine Jia's evaluation against role-specific nuances."
-								></i>
+								<SecretPromptInfo />
 							</div>
 							<p className="text-sm text-[#666666] mb-3" style={{ lineHeight: 1.5 }}>
 								Secret Prompts give you extra control over Jia's evaluation style, complementing her accurate
