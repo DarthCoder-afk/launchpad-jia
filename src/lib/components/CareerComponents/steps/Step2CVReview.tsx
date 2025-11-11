@@ -515,7 +515,7 @@ export default function Step2CVReview({
 																	style={{ flex: 1, border: "none", outline: "none", padding: "10px 12px", background: "transparent", fontSize: 14, color: "#181D27" }}
 																/>
 															</div>
-															<button onClick={() => removeOption(q.id, opt.id)} style={{ width: 28, height: 28, display: "inline-flex", alignItems: "center", justifyContent: "center", borderRadius: 999, border: "1px solid #E9EAEB", background: "#FFFFFF", color: "#667085" }} aria-label="Remove option">
+															<button onClick={() => removeOption(q.id, opt.id)} style={{ width: 28, height: 28, display: "inline-flex", alignItems: "center", justifyContent: "center", borderRadius: 999, border: "1px solid #E9EAEB", background: "#FFFFFF", color: "#667085", cursor: "pointer" }} aria-label="Remove option">
 																<i className="la la-times"></i>
 															</button>
 														</div>
